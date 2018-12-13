@@ -4,6 +4,8 @@ namespace MichaelDrennen\Robinhood;
 
 use Dotenv\Dotenv;
 use GuzzleHttp\Client;
+use MichaelDrennen\Robinhood\Responses\Accounts\Accounts;
+use MichaelDrennen\Robinhood\Responses\Positions\Positions;
 
 class Robinhood {
     protected $guzzle;
@@ -75,18 +77,34 @@ class Robinhood {
         $this->mfaCode      = $robinhoodResponse[ 'mfa_code' ];
         $this->backupCode   = $robinhoodResponse[ 'backup_code' ];
 
-        $this->guzzle = $this->createGuzzleClient($this->accessToken);
+        $this->guzzle = $this->createGuzzleClient( $this->accessToken );
     }
 
-    public function accounts(){
-        $url = '/accounts/';
-
-        $response = $this->guzzle->request( 'GET', $url );
-
-        $body = $response->getBody();
-
+    /**
+     * @return \MichaelDrennen\Robinhood\Responses\Accounts\Accounts
+     * @throws \GuzzleHttp\Exception\GuzzleException
+     */
+    public function accounts(): Accounts {
+        $url               = '/accounts/';
+        $response          = $this->guzzle->request( 'GET', $url );
+        $body              = $response->getBody();
         $robinhoodResponse = \GuzzleHttp\json_decode( $body->getContents(), TRUE );
+        return new Accounts( $robinhoodResponse );
+    }
 
-        print_r($robinhoodResponse);
+    public function positions() {
+        $url               = '/positions/';
+        $response          = $this->guzzle->request( 'GET', $url );
+        $body              = $response->getBody();
+        $robinhoodResponse = \GuzzleHttp\json_decode( $body->getContents(), TRUE );
+        return new Positions( $robinhoodResponse );
+    }
+
+    public function buy(string $ticker, int $shares){
+
+    }
+
+    public function sellPosition($ticker){
+
     }
 }

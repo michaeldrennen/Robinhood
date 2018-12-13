@@ -1,4 +1,5 @@
 <?php
+
 namespace Tests\Unit;
 
 use MichaelDrennen\Robinhood\Robinhood;
@@ -17,9 +18,13 @@ class RobinhoodTest extends TestCase {
     }
 
 
-    public function testLogin(){
+    public function testLogin() {
         $robinhood = new Robinhood();
-        $robinhood->login(getenv('USERNAME'), getenv('PASSWORD'), getenv('CLIENT_ID'));
-        $robinhood->accounts();
+        $robinhood->login( getenv( 'USERNAME' ), getenv( 'PASSWORD' ), getenv( 'CLIENT_ID' ) );
+        $accounts = $robinhood->accounts();
+        print_r( $accounts );
+
+        $positions = $robinhood->positions();
+        print_r( $positions );
     }
 }
