@@ -69,10 +69,20 @@ class Position {
     protected function getInstrumentIdFromInstrument( string $instrument ): string {
         $regexPattern = '/.*\/(.*)\/$/';
         preg_match( $regexPattern, $instrument, $matches );
-        if ( ! isset( $matches[ 0 ][ 1 ] ) ):
+        if ( ! isset( $matches[ 1 ] ) ):
             throw new \Exception( "Unable to find the instrument id from this string: " . $instrument );
         endif;
-        return $matches[ 0 ][ 1 ];
+        return $matches[ 1 ];
+    }
+
+    /**
+     * @return bool True if this position has at least one share.
+     */
+    public function hasShares(): bool {
+        if ( $this->quantity > 0 ):
+            return TRUE;
+        endif;
+        return FALSE;
     }
 
 }

@@ -27,21 +27,18 @@ class RobinhoodTest extends TestCase {
         $accounts = $robinhood->accounts();
         print_r( $accounts );
 
-        $positions = $robinhood->positions();
-        //print_r( $positions );
+        $positionsWithShares = $robinhood->positions()->hasShares();
+
 
         /**
          * @var $position \MichaelDrennen\Robinhood\Responses\Positions\Position
          */
-//        foreach ( $positions->positions as $i => $position ):
-//            try {
-//                $response = $robinhood->url( $position->instrument );
-//                echo "\n\n" . $i . " of " . count( $positions->positions ) . "\n\n";
-//                print_r( $response );
-//            } catch ( \Exception $exception ) {
-//                echo "\n\n" . $exception->getMessage() . "\n\n";
-//            }
-//        endforeach;
+        foreach ( $positionsWithShares->positions as $i => $position ):
+            $instrument = $robinhood->instrument( $position->instrumentId );
+            print_r( $instrument );
+        endforeach;
+
+        print( count( $positionsWithShares->positions ) . " with shares" );
 
         //$robinhood->instruments('lode');
 

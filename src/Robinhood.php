@@ -5,6 +5,7 @@ namespace MichaelDrennen\Robinhood;
 use Dotenv\Dotenv;
 use GuzzleHttp\Client;
 use MichaelDrennen\Robinhood\Responses\Accounts\Accounts;
+use MichaelDrennen\Robinhood\Responses\Instruments\Instrument;
 use MichaelDrennen\Robinhood\Responses\Positions\Positions;
 
 class Robinhood {
@@ -109,6 +110,22 @@ class Robinhood {
         return new Positions( $robinhoodResponse );
     }
 
+
+    /**
+     * @param string $instrumentId
+     * @return \MichaelDrennen\Robinhood\Responses\Instruments\Instrument
+     * @throws \GuzzleHttp\Exception\GuzzleException
+     */
+    public function instrument( string $instrumentId ): Instrument {
+        $url               = '/instruments/' . $instrumentId;
+        $response          = $this->guzzle->request( 'GET', $url );
+        $body              = $response->getBody();
+        $robinhoodResponse = \GuzzleHttp\json_decode( $body->getContents(), TRUE );
+
+        return new Instrument( $robinhoodResponse );
+    }
+
+    // ...?
     public function instruments( string $ticker ) {
         $url               = '/instruments/';
         $response          = $this->guzzle->request( 'GET', $url, [

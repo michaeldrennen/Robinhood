@@ -2,6 +2,8 @@
 
 namespace MichaelDrennen\Robinhood\Responses\Instruments;
 
+use Carbon\Carbon;
+
 class Instrument {
 
     public $margin_initial_ratio; //0.8000
@@ -29,28 +31,28 @@ class Instrument {
 
 
     public function __construct( array $result ) {
-        $this->margin_initial_ratio = $result[ 'margin_initial_ratio' ];
-        $this->rhs_tradability      = $result[ 'rhs_tradability' ];
-        $this->id                   = $result[ 'id' ];
-        $this->market               = $result[ 'market' ];
-        $this->simple_name          = $result[ 'simple_name' ];
-        $this->min_tick_size        = $result[ 'min_tick_size' ];
-        $this->maintenance_ratio    = $result[ 'maintenance_ratio' ];
-        $this->tradability          = $result[ 'tradability' ];
-        $this->state                = $result[ 'state' ];
-        $this->type                 = $result[ 'type' ];
-        $this->tradeable            = $result[ 'tradeable' ];
-        $this->fundamentals         = $result[ 'fundamentals' ];
-        $this->quote                = $result[ 'quote' ];
-        $this->symbol               = $result[ 'symbol' ];
-        $this->day_trade_ratio      = $result[ 'day_trade_ratio' ];
-        $this->name                 = $result[ 'name' ];
-        $this->tradable_chain_id    = $result[ 'tradable_chain_id' ];
-        $this->splits               = $result[ 'splits' ];
-        $this->url                  = $result[ 'url' ];
-        $this->country              = $result[ 'country' ];
-        $this->bloomberg_unique     = $result[ 'bloomberg_unique' ];
-        $this->list_date            = $result[ 'list_date' ];
+        $this->margin_initial_ratio = (float)$result[ 'margin_initial_ratio' ];
+        $this->rhs_tradability      = (string)$result[ 'rhs_tradability' ];
+        $this->id                   = (string)$result[ 'id' ];
+        $this->market               = (string)$result[ 'market' ];
+        $this->simple_name          = (string)$result[ 'simple_name' ];
+        $this->min_tick_size        = (string)$result[ 'min_tick_size' ];
+        $this->maintenance_ratio    = (float)$result[ 'maintenance_ratio' ];
+        $this->tradability          = (string)$result[ 'tradability' ];
+        $this->state                = (string)$result[ 'state' ];
+        $this->type                 = (string)$result[ 'type' ];
+        $this->tradeable            = empty( $result[ 'tradeable' ] ) ? FALSE : TRUE;
+        $this->fundamentals         = (string)$result[ 'fundamentals' ];
+        $this->quote                = (string)$result[ 'quote' ];
+        $this->symbol               = (string)$result[ 'symbol' ];
+        $this->day_trade_ratio      = (float)$result[ 'day_trade_ratio' ];
+        $this->name                 = (string)$result[ 'name' ];
+        $this->tradable_chain_id    = (string)$result[ 'tradable_chain_id' ];
+        $this->splits               = (string)$result[ 'splits' ];
+        $this->url                  = (string)$result[ 'url' ];
+        $this->country              = (string)$result[ 'country' ];
+        $this->bloomberg_unique     = (string)$result[ 'bloomberg_unique' ];
+        $this->list_date            = Carbon::parse( $result[ 'list_date' ] );
     }
 
 
