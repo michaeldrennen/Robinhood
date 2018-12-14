@@ -6,6 +6,7 @@ use Dotenv\Dotenv;
 use GuzzleHttp\Client;
 use MichaelDrennen\Robinhood\Responses\Accounts\Accounts;
 use MichaelDrennen\Robinhood\Responses\Instruments\Instrument;
+use MichaelDrennen\Robinhood\Responses\Orders\Order;
 use MichaelDrennen\Robinhood\Responses\Positions\Positions;
 
 class Robinhood {
@@ -162,11 +163,85 @@ class Robinhood {
         return $robinhoodResponse;
     }
 
-    public function buy( string $ticker, int $shares ) {
 
+
+    //          account: _private.account,
+    //          instrument: options.instrument.url,
+    //          price: options.bid_price,
+    //          stop_price: options.stop_price,
+    //          quantity: options.quantity,
+    //          side: options.transaction,
+    //          symbol: options.instrument.symbol.toUpperCase(),
+    //          time_in_force: options.time || 'gfd',
+    //          trigger: options.trigger || 'immediate',
+    //          type: options.type || 'market'
+    public function buy( string $account, string $instrumentUrl, string $ticker, int $shares, float $stopPrice = NULL, float $bidPrice = NULL ) {
+
+
+        $url               = '/orders/';
+        $response          = $this->guzzle->request( 'POST', $url,
+                                                     [
+                                                         'form_params' => [
+                                                             'account'       => $account,
+                                                             'instrument'    => $instrumentUrl,
+                                                             'price'         => $bidPrice,
+                                                             //
+                                                             'quantity'      => $shares,
+                                                             'side'          => 'buy',
+                                                             'symbol'        => $ticker,
+                                                             'time_in_force' => 'gfd',
+                                                             'trigger'       => 'immediate',
+                                                             'type'          => 'market',
+                                                         ],
+                                                     ] );
+        $body              = $response->getBody();
+        $robinhoodResponse = \GuzzleHttp\json_decode( $body->getContents(), TRUE );
+        return $robinhoodResponse;
     }
 
-    public function sellPosition( $ticker ) {
 
+    public function marketBuy( string $account, string $instrumentUrl, string $ticker, int $shares, float $bidPrice = NULL, bool $extendedHours = FALSE ) {
+        $url               = '/orders/';
+        $response          = $this->guzzle->request( 'POST', $url,
+                                                     [
+                                                         'form_params' => [
+                                                             'account'        => $account,
+                                                             'instrument'     => $instrumentUrl,
+                                                             'price'          => $bidPrice,
+                                                             'quantity'       => $shares,
+                                                             'side'           => 'buy',
+                                                             'symbol'         => $ticker,
+                                                             'time_in_force'  => 'gfd',
+                                                             'trigger'        => 'immediate',
+                                                             'type'           => 'market',
+                                                             'extended_hours' => $extendedHours,
+                                                         ],
+                                                     ] );
+        $body              = $response->getBody();
+        $robinhoodResponse = \GuzzleHttp\json_decode( $body->getContents(), TRUE );
+        return new Order( $robinhoodResponse );
+    }
+
+
+    public function marketSell( string $account, string $instrumentUrl, string $ticker, int $shares, float $stopPrice = NULL, bool $extendedHours = FALSE ) {
+        $url               = '/orders/';
+        $response          = $this->guzzle->request( 'POST', $url,
+                                                     [
+                                                         'form_params' => [
+                                                             'account'        => $account,
+                                                             'instrument'     => $instrumentUrl,
+                                                             'price'          => $stopPrice,
+                                                             'quantity'       => $shares,
+                                                             'side'           => 'sell',
+                                                             'symbol'         => $ticker,
+                                                             'time_in_force'  => 'gfd',
+                                                             'trigger'        => 'immediate',
+                                                             'type'           => 'market',
+                                                             'extended_hours' => $extendedHours,
+                                                         ],
+                                                     ] );
+        $body              = $response->getBody();
+        $robinhoodResponse = \GuzzleHttp\json_decode( $body->getContents(), TRUE );
+        return new Order( $robinhoodResponse );
     }
 }
