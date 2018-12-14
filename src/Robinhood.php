@@ -92,6 +92,15 @@ class Robinhood {
         return new Accounts( $robinhoodResponse );
     }
 
+    /**
+     * This method will return an array of Position records for every stock this account has ever owned. Even positions
+     * that you have sold out of.
+     * @todo Add code to handle pagination links when they get returned from Robinhood.
+     *       Once the test account has had a large enough number of stocks in it, the Robinhood API will probably send
+     *       paginated links to get the rest of your holdings.
+     * @return \MichaelDrennen\Robinhood\Responses\Positions\Positions
+     * @throws \GuzzleHttp\Exception\GuzzleException
+     */
     public function positions() {
         $url               = '/positions/';
         $response          = $this->guzzle->request( 'GET', $url );
@@ -100,11 +109,47 @@ class Robinhood {
         return new Positions( $robinhoodResponse );
     }
 
-    public function buy(string $ticker, int $shares){
+    public function instruments( string $ticker ) {
+        $url               = '/instruments/';
+        $response          = $this->guzzle->request( 'GET', $url, [
+            'query' => [ 'query' => strtoupper( $ticker ) ],
+        ] );
+        $body              = $response->getBody();
+        $robinhoodResponse = \GuzzleHttp\json_decode( $body->getContents(), TRUE );
+        print_r( $robinhoodResponse );
+        //return new Positions( $robinhoodResponse );
+    }
+
+    /**
+     * Some calls to the Robinhood API will return URLs in the result set. Use this method as a one-off to request that
+     * URL and see what gets returned.
+     * @param string $url
+     * @return array
+     * @throws \GuzzleHttp\Exception\GuzzleException
+     * @throws \Exception
+     */
+    public function url( string $url ): array {
+        $headers             = [];
+        $headers[ 'Accept' ] = 'application/json';
+        if ( ! $this->accessToken ):
+            throw new \Exception( "You need to login and get an access token before you can fire off this function." );
+        endif;
+        $headers[ 'Authorization' ] = 'Bearer ' . $this->accessToken;
+        $options                    = [
+            'headers' => $headers,
+        ];
+        $guzzleClient               = new Client( $options );
+        $response                   = $guzzleClient->request( 'GET', $url );
+        $body                       = $response->getBody();
+        $robinhoodResponse          = \GuzzleHttp\json_decode( $body->getContents(), TRUE );
+        return $robinhoodResponse;
+    }
+
+    public function buy( string $ticker, int $shares ) {
 
     }
 
-    public function sellPosition($ticker){
+    public function sellPosition( $ticker ) {
 
     }
 }

@@ -19,6 +19,10 @@ class Position {
     public $updated_at; // 2018-10-26T20:18:55.260166Z
     public $shares_held_for_buys; // 0.0000
     public $average_buy_price; // 79.4000
+
+    /**
+     * @var string The url to the
+     */
     public $instrument; // https://api.robinhood.com/instruments/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx/
     public $intraday_quantity; // 0.0000
     public $shares_held_for_sells; // 0.0000
