@@ -2,11 +2,9 @@
 
 namespace MichaelDrennen\Robinhood\Responses\Positions;
 
-
 use Carbon\Carbon;
 
 class Position {
-
 
     public $shares_held_for_stock_grants; // 0.0000
     public $account; // https://api.robinhood.com/accounts/XXXXXXXX/
@@ -29,7 +27,15 @@ class Position {
     public $shares_pending_from_options_events; // 0.0000
     public $quantity; // 1.0000
 
+    // Denormalized properties. These contain data that exist in other properties, but I want in a different format.
+    public $instrumentId;
 
+
+    /**
+     * Position constructor.
+     * @param array $position
+     * @throws \Exception
+     */
     public function __construct( array $position ) {
         $this->shares_held_for_stock_grants       = (float)$position[ 'shares_held_for_stock_grants' ];
         $this->account                            = (string)$position[ 'account' ];
@@ -47,7 +53,26 @@ class Position {
         $this->shares_held_for_sells              = (float)$position[ 'shares_held_for_sells' ];
         $this->shares_pending_from_options_events = (float)$position[ 'shares_pending_from_options_events' ];
         $this->quantity                           = (float)$position[ 'quantity' ];
+
+        // Assign denormalized properties here.
+        $this->instrumentId = $this->getInstrumentIdFromInstrument( $this->instrument );
     }
 
+
+    /**
+     * The instrument id is available in the instrument field, but there are circumstances where I want the instrument
+     * id by itself. This function uses a regular expression to parse it out.
+     * @param string $instrument Ex: https://api.robinhood.com/instruments/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx/
+     * @return string Ex: xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
+     * @throws \Exception
+     */
+    protected function getInstrumentIdFromInstrument( string $instrument ): string {
+        $regexPattern = '/.*\/(.*)\/$/';
+        preg_match( $regexPattern, $instrument, $matches );
+        if ( ! isset( $matches[ 0 ][ 1 ] ) ):
+            throw new \Exception( "Unable to find the instrument id from this string: " . $instrument );
+        endif;
+        return $matches[ 0 ][ 1 ];
+    }
 
 }
