@@ -232,6 +232,21 @@ class Robinhood {
         return new Order( $robinhoodResponse );
     }
 
+    /**
+     * Need to cancel a pending order?
+     * @param string $orderId
+     * @return \MichaelDrennen\Robinhood\Responses\Orders\Order
+     * @throws \GuzzleHttp\Exception\GuzzleException
+     */
+    public function cancelOrder( string $orderId ): Order {
+        $url               = '/orders/' . $orderId . '/cancel';
+        $response          = $this->guzzle->request( 'GET', $url );
+        $body              = $response->getBody();
+        $robinhoodResponse = \GuzzleHttp\json_decode( $body->getContents(), TRUE );
+
+        return new Order( $robinhoodResponse );
+    }
+
 
     protected function marketBuy( string $account, string $instrumentUrl, string $ticker, int $shares, float $bidPrice = NULL, bool $extendedHours = FALSE ) {
         $url               = '/orders/';

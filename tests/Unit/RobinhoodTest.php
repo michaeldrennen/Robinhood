@@ -62,7 +62,7 @@ class RobinhoodTest extends TestCase {
     public function testUnexecutedOrders(){
         $robinhood = new Robinhood();
         $robinhood->login( getenv( 'USERNAME' ), getenv( 'PASSWORD' ), getenv( 'CLIENT_ID' ) );
-        $unexecutedOrders = $robinhood->getRecentOrders()->unexecutedOrders();
+        $unexecutedOrders = $robinhood->getRecentOrders()->pendingOrders();
         print_r($unexecutedOrders);
     }
 

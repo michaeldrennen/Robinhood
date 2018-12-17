@@ -22,7 +22,13 @@ class Orders {
     }
 
 
-    public function unexecutedOrders() {
+    /**
+     * Orders don't necessarily get executed right away. Perhaps you:
+     *  - placed the order after market hours, or
+     *  - placed a buy with a limit price that is lower than the current market price.
+     * @return $this
+     */
+    public function pendingOrders() {
         $unexecutedOrders = [];
         /**
          * @var $order \MichaelDrennen\Robinhood\Responses\Orders\Order
