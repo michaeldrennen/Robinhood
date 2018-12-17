@@ -22,7 +22,7 @@ class RobinhoodTest extends TestCase {
     /**
      * @throws \GuzzleHttp\Exception\GuzzleException
      */
-    public function testLogin() {
+    //  public function testLogin() {
 //        $robinhood = new Robinhood();
 //        $robinhood->login( getenv( 'USERNAME' ), getenv( 'PASSWORD' ), getenv( 'CLIENT_ID' ) );
 //        $accounts = $robinhood->accounts();
@@ -41,9 +41,9 @@ class RobinhoodTest extends TestCase {
 //
 //        print( count( $positionsWithShares->positions ) . " with shares" );
 
-        //$robinhood->instruments('lode');
+    //$robinhood->instruments('lode');
 
-    }
+    // }
 
 //    public function testInstruments(){
 //        $robinhood = new Robinhood();
@@ -59,15 +59,25 @@ class RobinhoodTest extends TestCase {
 //        print_r($orders);
 //    }
 
-    public function testUnexecutedOrders(){
-        $robinhood = new Robinhood();
-        $robinhood->login( getenv( 'USERNAME' ), getenv( 'PASSWORD' ), getenv( 'CLIENT_ID' ) );
-        $unexecutedOrders = $robinhood->getRecentOrders()->pendingOrders();
-        print_r($unexecutedOrders);
-    }
+//    public function testUnexecutedOrders(){
+//        $robinhood = new Robinhood();
+//        $robinhood->login( getenv( 'USERNAME' ), getenv( 'PASSWORD' ), getenv( 'CLIENT_ID' ) );
+//        $unexecutedOrders = $robinhood->getRecentOrders()->pendingOrders();
+//        print_r($unexecutedOrders);
+//    }
 
 
-    public function Buy(){
+//    public function testMarketBuyWithAdujustedBidPrice() {
+//        $robinhood = new Robinhood();
+//        $robinhood->login( getenv( 'USERNAME' ), getenv( 'PASSWORD' ), getenv( 'CLIENT_ID' ) );
+//        $robinhood->setMainAccountId();
+//        $order = $robinhood->marketBuy( $robinhood->mainAccountUrl, 'LODE', 1 );
+//        print_r( $order );
+//
+//    }
+
+
+    public function Buy() {
         $robinhood = new Robinhood();
         $robinhood->login( getenv( 'USERNAME' ), getenv( 'PASSWORD' ), getenv( 'CLIENT_ID' ) );
         $accounts = $robinhood->accounts();
@@ -80,13 +90,13 @@ class RobinhoodTest extends TestCase {
         /**
          * @var $position \MichaelDrennen\Robinhood\Responses\Positions\Position
          */
-        foreach($positionsWithShares->positions as $position):
+        foreach ( $positionsWithShares->positions as $position ):
             $instrumentId = $position->instrumentId;
-            $instrument = $robinhood->instrument($instrumentId);
+            $instrument   = $robinhood->instrument( $instrumentId );
             echo "\nInstrument: " . $instrument->symbol;
-            $stocks[$instrument->symbol] = [
-                'symbol' => $instrument->symbol,
-                'instrumentUrl' => $instrument->url
+            $stocks[ $instrument->symbol ] = [
+                'symbol'        => $instrument->symbol,
+                'instrumentUrl' => $instrument->url,
             ];
         endforeach;
 
@@ -95,14 +105,14 @@ class RobinhoodTest extends TestCase {
         /**
          * @var $mainAccount \MichaelDrennen\Robinhood\Responses\Accounts\Account
          */
-        $mainAccount = $accounts->accounts[0];
+        $mainAccount   = $accounts->accounts[ 0 ];
         $accountNumber = $mainAccount->rhs_account_number;
-        $accountUrl = $mainAccount->url;
+        $accountUrl    = $mainAccount->url;
 
-        print_r($mainAccount);
+        print_r( $mainAccount );
 
-        print_r($accountNumber);
-        print_r($stocks);
+        print_r( $accountNumber );
+        print_r( $stocks );
 
         //$response = $robinhood->buy($accountUrl,$stocks['LODE']['instrumentUrl'],'LODE',1,0.16,0.16);
 //        $response = $robinhood->buy($accountNumber,'https://robinhood.com/stocks/LODE','LODE',1);
