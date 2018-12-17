@@ -4,31 +4,34 @@ namespace MichaelDrennen\Robinhood\Responses\Instruments;
 
 use Carbon\Carbon;
 
+/**
+ * Class Instrument
+ * @package MichaelDrennen\Robinhood\Responses\Instruments
+ */
 class Instrument {
 
-    public $margin_initial_ratio; //0.8000
-    public $rhs_tradability; //tradable
-    public $id; //510a1f2e-8cde-468f-957c-99ae4f528ea6
-    public $market; //https://api.robinhood.com/markets/XNAS/
-    public $simple_name; //MadrigalPharmaceuticals
-    public $min_tick_size; //
-    public $maintenance_ratio; //0.7500
-    public $tradability; //tradable
-    public $state; //active
-    public $type; //stock
-    public $tradeable; //1
-    public $fundamentals; //https://api.robinhood.com/fundamentals/MDGL/
-    public $quote; //https://api.robinhood.com/quotes/MDGL/
-    public $symbol; //MDGL
-    public $day_trade_ratio; //0.2500
-    public $name; //MadrigalPharmaceuticals
-    public $tradable_chain_id; //8d76e826-c232-4ed2-bf89-7bd844135ebd
-    public $splits; //https://api.robinhood.com/instruments/510a1f2e-8cde-468f-957c-99ae4f528ea6/splits/
-    public $url; //https://api.robinhood.com/instruments/510a1f2e-8cde-468f-957c-99ae4f528ea6/
-    public $country; //US
-    public $bloomberg_unique; //EQ0000000001566233
-    public $list_date; //2007-02-06
-
+    public $margin_initial_ratio; // 0.8000
+    public $rhs_tradability; // tradable
+    public $id; // 510a1f2e-8cde-468f-957c-99ae4f528ea6
+    public $market; // https://api.robinhood.com/markets/XNAS/
+    public $simple_name; // MadrigalPharmaceuticals
+    public $min_tick_size; // 
+    public $maintenance_ratio; // 0.7500
+    public $tradability; // tradable
+    public $state; // active
+    public $type; // stock
+    public $tradeable; // 1
+    public $fundamentals; // https://api.robinhood.com/fundamentals/MDGL/
+    public $quote; // https://api.robinhood.com/quotes/MDGL/
+    public $symbol; // MDGL
+    public $day_trade_ratio; // 0.2500
+    public $name; // MadrigalPharmaceuticals
+    public $tradable_chain_id; // 8d76e826-c232-4ed2-bf89-7bd844135ebd
+    public $splits; // https://api.robinhood.com/instruments/510a1f2e-8cde-468f-957c-99ae4f528ea6/splits/
+    public $url; //  https://api.robinhood.com/instruments/510a1f2e-8cde-468f-957c-99ae4f528ea6/
+    public $country; // US
+    public $bloomberg_unique; // EQ0000000001566233
+    public $list_date; // 2007-02-06
 
     public function __construct( array $result ) {
         $this->margin_initial_ratio = (float)$result[ 'margin_initial_ratio' ];

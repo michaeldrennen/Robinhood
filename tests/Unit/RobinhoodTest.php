@@ -45,7 +45,29 @@ class RobinhoodTest extends TestCase {
 
     }
 
-    public function testBuy(){
+//    public function testInstruments(){
+//        $robinhood = new Robinhood();
+//        $robinhood->login( getenv( 'USERNAME' ), getenv( 'PASSWORD' ), getenv( 'CLIENT_ID' ) );
+//        $instruments = $robinhood->instruments('LODE');
+//        print_r($instruments);
+//    }
+//
+//    public function testGetRecentOrders(){
+//        $robinhood = new Robinhood();
+//        $robinhood->login( getenv( 'USERNAME' ), getenv( 'PASSWORD' ), getenv( 'CLIENT_ID' ) );
+//        $orders = $robinhood->getRecentOrders();
+//        print_r($orders);
+//    }
+
+    public function testUnexecutedOrders(){
+        $robinhood = new Robinhood();
+        $robinhood->login( getenv( 'USERNAME' ), getenv( 'PASSWORD' ), getenv( 'CLIENT_ID' ) );
+        $unexecutedOrders = $robinhood->getRecentOrders()->unexecutedOrders();
+        print_r($unexecutedOrders);
+    }
+
+
+    public function Buy(){
         $robinhood = new Robinhood();
         $robinhood->login( getenv( 'USERNAME' ), getenv( 'PASSWORD' ), getenv( 'CLIENT_ID' ) );
         $accounts = $robinhood->accounts();
