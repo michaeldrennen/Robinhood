@@ -2,6 +2,7 @@
 
 namespace Tests\Unit;
 
+use Dotenv\Dotenv;
 use MichaelDrennen\Robinhood\Responses\Instruments\Instrument;
 use MichaelDrennen\Robinhood\Robinhood;
 use PHPUnit\Framework\TestCase;
@@ -78,18 +79,26 @@ class RobinhoodTest extends TestCase {
 
 
     public function testMarketSellWithAdjustedAskPrice() {
+        $dotenv = new Dotenv( __DIR__ );
+        $dotenv->load();
         $robinhood = new Robinhood();
-        $robinhood->login( getenv( 'USERNAME' ), getenv( 'PASSWORD' ), getenv( 'CLIENT_ID' ) );
-        $robinhood->setMainAccountId();
-        $order = $robinhood->marketSell( $robinhood->mainAccountUrl, 'LODE', 1 );
-        print_r( $order );
+
+        try {
+            $robinhood->login( getenv( 'USERNAME' ), getenv( 'PASSWORD' ) );
+            $robinhood->setMainAccountId();
+            $order = $robinhood->marketSell( $robinhood->mainAccountUrl, 'LODE', 1 );
+            print_r( $order );
+        } catch ( \Exception $exception ) {
+            print_r( $exception->getMessage() );
+        }
+
 
     }
 
 
     public function Buy() {
         $robinhood = new Robinhood();
-        $robinhood->login( getenv( 'USERNAME' ), getenv( 'PASSWORD' ), getenv( 'CLIENT_ID' ) );
+        $robinhood->login( getenv( 'USERNAME' ), getenv( 'PASSWORD' ) );
         $accounts = $robinhood->accounts();
         print_r( $accounts );
 

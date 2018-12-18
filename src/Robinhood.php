@@ -61,13 +61,15 @@ class Robinhood {
     /**
      * @param string $username
      * @param string $password
-     * @param string $clientId
      * @throws \GuzzleHttp\Exception\GuzzleException
+     * @throws \Exception
      */
-    public function login( string $username, string $password, string $clientId ) {
+    public function login( string $username, string $password ) {
         $url = '/oauth2/token/';
+        $clientId = $this->getClientId();
 
-        $formParams = [
+        $options = [
+//            'debug' => true,
             'form_params' => [
                 'username'   => $username,
                 'password'   => $password,
@@ -76,9 +78,10 @@ class Robinhood {
             ],
         ];
 
-        $response           = $this->guzzle->request( 'POST', $url, $formParams );
+        $response           = $this->guzzle->request( 'POST', $url, $options );
         $body               = $response->getBody();
         $robinhoodResponse  = \GuzzleHttp\json_decode( $body->getContents(), TRUE );
+
         $this->accessToken  = $robinhoodResponse[ 'access_token' ];
         $this->expiresIn    = $robinhoodResponse[ 'expires_in' ];
         $this->tokenType    = $robinhoodResponse[ 'token_type' ];
@@ -87,6 +90,22 @@ class Robinhood {
         $this->mfaCode      = $robinhoodResponse[ 'mfa_code' ];
         $this->backupCode   = $robinhoodResponse[ 'backup_code' ];
         $this->guzzle       = $this->createGuzzleClient( $this->accessToken );
+    }
+
+    /**
+     * @return mixed
+     * @throws \GuzzleHttp\Exception\GuzzleException
+     */
+    protected function getClientId() {
+        $client   = new Client( [] );
+        $response = $client->request( 'GET', 'https://robinhood.com/login' );
+        $body     = $response->getBody();
+        $pattern  = "/oauthClientId = '(.*)';/";
+        preg_match( $pattern, $body, $matches );
+        if ( empty( $matches ) ):
+            throw new \Exception( "Unable to get the client id, so we can't login." );
+        endif;
+        return $matches[ 1 ];
     }
 
     /**
@@ -358,8 +377,8 @@ class Robinhood {
      * @throws \GuzzleHttp\Exception\GuzzleException
      */
     public function marketSell( string $account, string $ticker, int $shares, float $stopPrice = NULL, bool $extendedHours = FALSE ) {
-        $instrumentUrl    = $this->getInstrumentUrlFromTicker( $ticker );
-        $askPrice         = $this->getAskPriceFromTicker( $ticker );
+        $instrumentUrl     = $this->getInstrumentUrlFromTicker( $ticker );
+        $askPrice          = $this->getAskPriceFromTicker( $ticker );
         $adjustedStopPrice = $this->getAdjustedStopPrice( $askPrice );
 
         $url               = '/orders/';
