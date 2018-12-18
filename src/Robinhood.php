@@ -275,19 +275,18 @@ class Robinhood {
 
     /**
      * @TODO test extendedHours after hours to see if it will execute if passed in a TRUE value.
-     * @param string     $accountUrl    Ex: https://api.robinhood.com/accounts/ABC12345/
-     * @param string     $ticker        Ex: LODE
-     * @param int        $shares        How many shares you want to buy.
-     * @param bool       $extendedHours Not sure this is required either...
+     * @param string $accountUrl    Ex: https://api.robinhood.com/accounts/ABC12345/
+     * @param string $ticker        Ex: LODE
+     * @param int    $shares        How many shares you want to buy.
+     * @param bool   $extendedHours Not sure this is required either...
      * @return \MichaelDrennen\Robinhood\Responses\Orders\Order
      * @throws \GuzzleHttp\Exception\GuzzleException
      * @throws \Exception
      */
     public function marketBuy( string $accountUrl, string $ticker, int $shares, bool $extendedHours = FALSE ) {
-        $instrumentUrl = $this->getInstrumentUrlFromTicker( $ticker );
-
-        $bidPrice = $this->getBidPriceFromTicker($ticker);
-        $adjustedBidPrice = $bidPrice + 1; // Add a dollar to ensure execution.
+        $instrumentUrl    = $this->getInstrumentUrlFromTicker( $ticker );
+        $bidPrice         = $this->getBidPriceFromTicker( $ticker );
+        $adjustedBidPrice = $this->getAdjustedBidPrice( $bidPrice );
 
         $url               = '/orders/';
         $response          = $this->guzzle->request( 'POST', $url,
@@ -310,37 +309,66 @@ class Robinhood {
         return new Order( $robinhoodResponse );
     }
 
-    public function limitBuy( string $account, string $instrumentUrl, string $ticker, int $shares, float $bidPrice = NULL, bool $extendedHours = FALSE ) {
-        $url               = '/orders/';
-        $response          = $this->guzzle->request( 'POST', $url,
-                                                     [
-                                                         'form_params' => [
-                                                             'account'        => $account,
-                                                             'instrument'     => $instrumentUrl,
-                                                             'price'          => $bidPrice,
-                                                             'quantity'       => $shares,
-                                                             'side'           => 'buy',
-                                                             'symbol'         => $ticker,
-                                                             'time_in_force'  => 'gfd',
-                                                             'trigger'        => 'immediate',
-                                                             'type'           => 'limit',
-                                                             'extended_hours' => $extendedHours,
-                                                         ],
-                                                     ] );
-        $body              = $response->getBody();
-        $robinhoodResponse = \GuzzleHttp\json_decode( $body->getContents(), TRUE );
-        return new Order( $robinhoodResponse );
+    /**
+     * When making a BUY, either market or limit, you need to pass in a price. From what I can tell, the Robinhood API
+     * treats both as a limit order. Pass in a price greater than the market price, and the order should execute at the
+     * market price. This function adjusts the bid price to meet that criteria.
+     * @note Prices over $1 can't have sub penny increments, which is why you see the call to round() in there.
+     * @param float $bidPrice The bid price returned from the quotes API call.
+     * @return float
+     */
+    protected function getAdjustedBidPrice( float $bidPrice ): float {
+        if ( $bidPrice >= 1 ):
+            return (float)( round( $bidPrice, 2 ) + 1 );
+        endif;
+
+        return (float)( $bidPrice + .1 );
     }
 
+//    public function limitBuy( string $account, string $instrumentUrl, string $ticker, int $shares, float $bidPrice = NULL, bool $extendedHours = FALSE ) {
+//        $url               = '/orders/';
+//        $response          = $this->guzzle->request( 'POST', $url,
+//                                                     [
+//                                                         'form_params' => [
+//                                                             'account'        => $account,
+//                                                             'instrument'     => $instrumentUrl,
+//                                                             'price'          => $bidPrice,
+//                                                             'quantity'       => $shares,
+//                                                             'side'           => 'buy',
+//                                                             'symbol'         => $ticker,
+//                                                             'time_in_force'  => 'gfd',
+//                                                             'trigger'        => 'immediate',
+//                                                             'type'           => 'limit',
+//                                                             'extended_hours' => $extendedHours,
+//                                                         ],
+//                                                     ] );
+//        $body              = $response->getBody();
+//        $robinhoodResponse = \GuzzleHttp\json_decode( $body->getContents(), TRUE );
+//        return new Order( $robinhoodResponse );
+//    }
 
-    protected function marketSell( string $account, string $instrumentUrl, string $ticker, int $shares, float $stopPrice = NULL, bool $extendedHours = FALSE ) {
+
+    /**
+     * @param string     $account
+     * @param string     $ticker
+     * @param int        $shares
+     * @param float|NULL $stopPrice
+     * @param bool       $extendedHours
+     * @return \MichaelDrennen\Robinhood\Responses\Orders\Order
+     * @throws \GuzzleHttp\Exception\GuzzleException
+     */
+    public function marketSell( string $account, string $ticker, int $shares, float $stopPrice = NULL, bool $extendedHours = FALSE ) {
+        $instrumentUrl    = $this->getInstrumentUrlFromTicker( $ticker );
+        $askPrice         = $this->getAskPriceFromTicker( $ticker );
+        $adjustedStopPrice = $this->getAdjustedStopPrice( $askPrice );
+
         $url               = '/orders/';
         $response          = $this->guzzle->request( 'POST', $url,
                                                      [
                                                          'form_params' => [
                                                              'account'        => $account,
                                                              'instrument'     => $instrumentUrl,
-                                                             'price'          => $stopPrice,
+                                                             'price'          => $adjustedStopPrice,
                                                              'quantity'       => $shares,
                                                              'side'           => 'sell',
                                                              'symbol'         => $ticker,
@@ -356,11 +384,23 @@ class Robinhood {
     }
 
     /**
+     * @param float $stopPrice
+     * @return float
+     */
+    public function getAdjustedStopPrice( float $stopPrice ): float {
+        if ( $stopPrice >= 1 ):
+            return (float)( round( $stopPrice, 2 ) - 1 );
+        endif;
+
+        return (float)( $stopPrice - .1 );
+    }
+
+    /**
      * @param string $ticker
      * @return \MichaelDrennen\Robinhood\Responses\Quotes\Quote
      * @throws \GuzzleHttp\Exception\GuzzleException
      */
-    public function quote(string $ticker): Quote{
+    public function quote( string $ticker ): Quote {
         $url               = '/quotes/' . $ticker . '/';
         $response          = $this->guzzle->request( 'GET', $url );
         $body              = $response->getBody();
@@ -389,9 +429,24 @@ class Robinhood {
         throw new \Exception( "Unable to find the instrument url for the ticker: " . $ticker );
     }
 
-    protected function getBidPriceFromTicker(string $ticker): float{
-        $quote = $this->quote($ticker);
+    /**
+     * @param string $ticker
+     * @return float
+     * @throws \GuzzleHttp\Exception\GuzzleException
+     */
+    protected function getBidPriceFromTicker( string $ticker ): float {
+        $quote = $this->quote( $ticker );
         return $quote->bid_price;
+    }
+
+    /**
+     * @param string $ticker
+     * @return float
+     * @throws \GuzzleHttp\Exception\GuzzleException
+     */
+    protected function getAskPriceFromTicker( string $ticker ): float {
+        $quote = $this->quote( $ticker );
+        return $quote->ask_price;
     }
 
 

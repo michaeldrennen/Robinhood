@@ -67,7 +67,7 @@ class RobinhoodTest extends TestCase {
 //    }
 
 
-//    public function testMarketBuyWithAdujustedBidPrice() {
+//    public function testMarketBuyWithAdjustedBidPrice() {
 //        $robinhood = new Robinhood();
 //        $robinhood->login( getenv( 'USERNAME' ), getenv( 'PASSWORD' ), getenv( 'CLIENT_ID' ) );
 //        $robinhood->setMainAccountId();
@@ -75,6 +75,16 @@ class RobinhoodTest extends TestCase {
 //        print_r( $order );
 //
 //    }
+
+
+    public function testMarketSellWithAdjustedAskPrice() {
+        $robinhood = new Robinhood();
+        $robinhood->login( getenv( 'USERNAME' ), getenv( 'PASSWORD' ), getenv( 'CLIENT_ID' ) );
+        $robinhood->setMainAccountId();
+        $order = $robinhood->marketSell( $robinhood->mainAccountUrl, 'LODE', 1 );
+        print_r( $order );
+
+    }
 
 
     public function Buy() {
