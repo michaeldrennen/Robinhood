@@ -34,8 +34,8 @@ class Robinhood {
      * Robinhood constructor.
      */
     public function __construct() {
-        $dotenv = new Dotenv( __DIR__ );
-        $dotenv->load();
+//        $dotenv = new Dotenv( __DIR__ );
+//        $dotenv->load();
         $this->guzzle = $this->createGuzzleClient();
     }
 
