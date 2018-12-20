@@ -39,7 +39,7 @@ class Robinhood {
     public function __construct( string $accessToken = NULL, string $refreshToken = NULL ) {
         $this->accessToken  = $accessToken;
         $this->refreshToken = $refreshToken;
-        $this->guzzle       = $this->createGuzzleClient();
+        $this->guzzle       = $this->createGuzzleClient($accessToken);
     }
 
     /**
