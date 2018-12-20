@@ -39,7 +39,15 @@ class Robinhood {
     public function __construct( string $accessToken = NULL, string $refreshToken = NULL ) {
         $this->accessToken  = $accessToken;
         $this->refreshToken = $refreshToken;
-        $this->guzzle       = $this->createGuzzleClient($accessToken);
+        $this->guzzle       = $this->createGuzzleClient( $accessToken );
+    }
+
+    public function getAccessToken() {
+        return $this->accessToken;
+    }
+
+    public function getRefreshToken() {
+        return $this->refreshToken;
     }
 
     /**
@@ -73,12 +81,12 @@ class Robinhood {
 
         $options = [
 //            'debug' => true,
-                'form_params' => [
-                'username'   => $username,
-                'password'   => $password,
-                'grant_type' => 'password',
-                'client_id'  => $clientId,
-            ],
+'form_params' => [
+    'username'   => $username,
+    'password'   => $password,
+    'grant_type' => 'password',
+    'client_id'  => $clientId,
+],
         ];
 
         $response          = $this->guzzle->request( 'POST', $url, $options );
