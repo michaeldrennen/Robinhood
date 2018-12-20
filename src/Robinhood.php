@@ -2,7 +2,7 @@
 
 namespace MichaelDrennen\Robinhood;
 
-use Dotenv\Dotenv;
+
 use GuzzleHttp\Client;
 use MichaelDrennen\Robinhood\Responses\Accounts\Accounts;
 use MichaelDrennen\Robinhood\Responses\Instruments\Instrument;
@@ -32,11 +32,14 @@ class Robinhood {
 
     /**
      * Robinhood constructor.
+     * @param string|NULL $accessToken  If you have already authenticated with the API, no need to login again. Pass
+     *                                  the access token into the constructor.
+     * @param string|NULL $refreshToken I'm not implementing this yet, but I will soon.
      */
-    public function __construct() {
-//        $dotenv = new Dotenv( __DIR__ );
-//        $dotenv->load();
-        $this->guzzle = $this->createGuzzleClient();
+    public function __construct( string $accessToken = NULL, string $refreshToken = NULL ) {
+        $this->accessToken  = $accessToken;
+        $this->refreshToken = $refreshToken;
+        $this->guzzle       = $this->createGuzzleClient();
     }
 
     /**
@@ -65,12 +68,12 @@ class Robinhood {
      * @throws \Exception
      */
     public function login( string $username, string $password ) {
-        $url = '/oauth2/token/';
+        $url      = '/oauth2/token/';
         $clientId = $this->getClientId();
 
         $options = [
 //            'debug' => true,
-            'form_params' => [
+                'form_params' => [
                 'username'   => $username,
                 'password'   => $password,
                 'grant_type' => 'password',
@@ -78,9 +81,9 @@ class Robinhood {
             ],
         ];
 
-        $response           = $this->guzzle->request( 'POST', $url, $options );
-        $body               = $response->getBody();
-        $robinhoodResponse  = \GuzzleHttp\json_decode( $body->getContents(), TRUE );
+        $response          = $this->guzzle->request( 'POST', $url, $options );
+        $body              = $response->getBody();
+        $robinhoodResponse = \GuzzleHttp\json_decode( $body->getContents(), TRUE );
 
         $this->accessToken  = $robinhoodResponse[ 'access_token' ];
         $this->expiresIn    = $robinhoodResponse[ 'expires_in' ];
