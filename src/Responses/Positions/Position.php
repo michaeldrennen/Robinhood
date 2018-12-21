@@ -34,6 +34,7 @@ class Position {
     // Related properties. These contain data that can only be retrieved through other API calls.
     public $symbol;
     public $lastTradePrice;
+    public $marketValueFromLastTradePrice;
 
 
     /**
@@ -101,8 +102,9 @@ class Position {
         /**
          * @var \MichaelDrennen\Robinhood\Responses\Quotes\Quote $quote
          */
-        $quote                = $robinhood->quote( $this->symbol );
-        $this->lastTradePrice = $quote->last_trade_price;
+        $quote                               = $robinhood->quote( $this->symbol );
+        $this->lastTradePrice                = $quote->last_trade_price;
+        $this->marketValueFromLastTradePrice = $this->lastTradePrice * $this->quantity;
     }
 
     /**
