@@ -2,6 +2,8 @@
 
 namespace MichaelDrennen\Robinhood\Responses\Positions;
 
+use MichaelDrennen\Robinhood\Robinhood;
+
 class Positions {
 
     /**
@@ -22,12 +24,16 @@ class Positions {
     }
 
 
-    public function addSymbols(){
+    /**
+     * @param \MichaelDrennen\Robinhood\Robinhood $robinhood
+     * @return $this
+     */
+    public function addSymbols(Robinhood $robinhood){
         /**
          * @var \MichaelDrennen\Robinhood\Responses\Positions\Position $position
          */
         foreach($this->positions as $i => $position):
-            $this->positions[$i]->addSymbol();
+            $this->positions[$i]->addSymbol($robinhood);
         endforeach;
         return $this;
     }
