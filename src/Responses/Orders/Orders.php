@@ -2,9 +2,10 @@
 
 namespace MichaelDrennen\Robinhood\Responses\Orders;
 
+use MichaelDrennen\Robinhood\Responses\RobinhoodResponse;
 use MichaelDrennen\Robinhood\Robinhood;
 
-class Orders {
+class Orders extends RobinhoodResponse {
 
     /**
      * @var array An array of Order objects.
@@ -50,10 +51,14 @@ class Orders {
      */
     public function addSymbols( Robinhood $robinhood ) {
         /**
-         * @var \MichaelDrennen\Robinhood\Responses\Positions\Position $position
+         * @var \MichaelDrennen\Robinhood\Responses\Orders\Order $order
          */
-        foreach ( $this->orders as $i => $position ):
-            $this->orders[ $i ]->addSymbol( $robinhood );
+        foreach ( $this->orders as $i => $order ):
+            try {
+                $this->orders[ $i ]->addSymbol( $robinhood );
+            } catch ( \Exception $exception ) {
+                $this->addException( $exception );
+            }
         endforeach;
         return $this;
     }

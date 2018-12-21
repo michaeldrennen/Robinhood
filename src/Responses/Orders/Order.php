@@ -78,8 +78,14 @@ class Order {
         /**
          * @var \MichaelDrennen\Robinhood\Responses\Instruments\Instrument $instrument
          */
-        $instrument   = $robinhood->instrument( $instrumentId );
-        $this->symbol = $instrument->symbol;
+        try {
+            $instrument   = $robinhood->instrument( $instrumentId );
+            $this->symbol = $instrument->symbol;
+        } catch ( \Exception $exception ) {
+            $this->symbol = NULL;
+            throw $exception;
+        }
+
     }
 
 }
