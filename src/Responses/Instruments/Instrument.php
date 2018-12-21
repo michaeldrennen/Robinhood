@@ -3,6 +3,7 @@
 namespace MichaelDrennen\Robinhood\Responses\Instruments;
 
 use Carbon\Carbon;
+use MichaelDrennen\Robinhood\Robinhood;
 
 /**
  * Class Instrument
@@ -57,6 +58,8 @@ class Instrument {
         $this->bloomberg_unique     = (string)$result[ 'bloomberg_unique' ];
         $this->list_date            = Carbon::parse( $result[ 'list_date' ] );
     }
+
+
 
 
 }

@@ -2,6 +2,8 @@
 
 namespace MichaelDrennen\Robinhood\Responses\Orders;
 
+use MichaelDrennen\Robinhood\Robinhood;
+
 class Orders {
 
     /**
@@ -39,6 +41,20 @@ class Orders {
             endif;
         endforeach;
         $this->orders = $unexecutedOrders;
+        return $this;
+    }
+
+    /**
+     * @param \MichaelDrennen\Robinhood\Robinhood $robinhood
+     * @return $this
+     */
+    public function addSymbols( Robinhood $robinhood ) {
+        /**
+         * @var \MichaelDrennen\Robinhood\Responses\Positions\Position $position
+         */
+        foreach ( $this->orders as $i => $position ):
+            $this->orders[ $i ]->addSymbol( $robinhood );
+        endforeach;
         return $this;
     }
 

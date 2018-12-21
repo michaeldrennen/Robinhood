@@ -3,6 +3,7 @@
 namespace MichaelDrennen\Robinhood\Responses\Orders;
 
 use Carbon\Carbon;
+use MichaelDrennen\Robinhood\Robinhood;
 
 class Order {
 
@@ -34,6 +35,9 @@ class Order {
     public $average_price; //
     public $quantity; // 1.00000
 
+    //
+    public $symbol;
+
     public function __construct( $result ) {
         $this->updated_at                = Carbon::parse( $result[ 'updated_at' ] );
         $this->ref_id                    = $result[ 'ref_id' ];
@@ -64,5 +68,18 @@ class Order {
         $this->quantity                  = (float)$result[ 'quantity' ];
     }
 
+
+    /**
+     * @param \MichaelDrennen\Robinhood\Robinhood $robinhood
+     * @throws \GuzzleHttp\Exception\GuzzleException
+     */
+    public function addSymbol( Robinhood $robinhood ) {
+        $instrumentId = $this->id;
+        /**
+         * @var \MichaelDrennen\Robinhood\Responses\Instruments\Instrument $instrument
+         */
+        $instrument   = $robinhood->instrument( $instrumentId );
+        $this->symbol = $instrument->symbol;
+    }
 
 }
