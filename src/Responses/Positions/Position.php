@@ -33,6 +33,7 @@ class Position {
 
     // Related properties. These contain data that can only be retrieved through other API calls.
     public $symbol;
+    public $lastTradePrice;
 
 
     /**
@@ -85,8 +86,23 @@ class Position {
      */
     public function addSymbol( Robinhood $robinhood ) {
         $instrumentId = $this->instrumentId;
+        /**
+         * @var \MichaelDrennen\Robinhood\Responses\Instruments\Instrument $instrument
+         */
         $instrument   = $robinhood->instrument( $instrumentId );
         $this->symbol = $instrument->symbol;
+    }
+
+    /**
+     * @param \MichaelDrennen\Robinhood\Robinhood $robinhood
+     * @throws \GuzzleHttp\Exception\GuzzleException
+     */
+    public function addLastTradePrice( Robinhood $robinhood ) {
+        /**
+         * @var \MichaelDrennen\Robinhood\Responses\Quotes\Quote $quote
+         */
+        $quote                = $robinhood->quote( $this->symbol );
+        $this->lastTradePrice = $quote->last_trade_price;
     }
 
     /**

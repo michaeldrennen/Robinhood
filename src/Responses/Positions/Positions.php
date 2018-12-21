@@ -28,12 +28,26 @@ class Positions {
      * @param \MichaelDrennen\Robinhood\Robinhood $robinhood
      * @return $this
      */
-    public function addSymbols(Robinhood $robinhood){
+    public function addSymbols( Robinhood $robinhood ) {
         /**
          * @var \MichaelDrennen\Robinhood\Responses\Positions\Position $position
          */
-        foreach($this->positions as $i => $position):
-            $this->positions[$i]->addSymbol($robinhood);
+        foreach ( $this->positions as $i => $position ):
+            $this->positions[ $i ]->addSymbol( $robinhood );
+        endforeach;
+        return $this;
+    }
+
+    /**
+     * @param \MichaelDrennen\Robinhood\Robinhood $robinhood
+     * @return $this
+     */
+    public function addLastTradePrice( Robinhood $robinhood ) {
+        /**
+         * @var \MichaelDrennen\Robinhood\Responses\Positions\Position $position
+         */
+        foreach ( $this->positions as $i => $position ):
+            $this->positions[ $i ]->addLastTradePrice( $robinhood );
         endforeach;
         return $this;
     }
@@ -43,7 +57,7 @@ class Positions {
      * positions that you have sold out of. Use this method to remove positions that don't have shares in them.
      * @return $this
      */
-    public function hasShares(){
+    public function hasShares() {
         $nonZeroPositions = [];
         /**
          * @var $position \MichaelDrennen\Robinhood\Responses\Positions\Position
