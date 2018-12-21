@@ -22,6 +22,16 @@ class Positions {
     }
 
 
+    public function addSymbols(){
+        /**
+         * @var \MichaelDrennen\Robinhood\Responses\Positions\Position $position
+         */
+        foreach($this->positions as $i => $position):
+            $this->positions[$i]->addSymbol();
+        endforeach;
+        return $this;
+    }
+
     /**
      * When you ask the Robinhood API for your positions, it will return every stock you have ever held. This includes
      * positions that you have sold out of. Use this method to remove positions that don't have shares in them.

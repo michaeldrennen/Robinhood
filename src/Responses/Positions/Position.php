@@ -3,6 +3,7 @@
 namespace MichaelDrennen\Robinhood\Responses\Positions;
 
 use Carbon\Carbon;
+use MichaelDrennen\Robinhood\Robinhood;
 
 class Position {
 
@@ -29,6 +30,9 @@ class Position {
 
     // Denormalized properties. These contain data that exist in other properties, but I want in a different format.
     public $instrumentId;
+
+    // Related properties. These contain data that can only be retrieved through other API calls.
+    public $symbol;
 
 
     /**
@@ -73,6 +77,16 @@ class Position {
             throw new \Exception( "Unable to find the instrument id from this string: " . $instrument );
         endif;
         return $matches[ 1 ];
+    }
+
+    /**
+     * @param \MichaelDrennen\Robinhood\Robinhood $robinhood
+     * @throws \GuzzleHttp\Exception\GuzzleException
+     */
+    public function addSymbol( Robinhood $robinhood ) {
+        $instrumentId = $this->instrumentId;
+        $instrument   = $robinhood->instrument( $instrumentId );
+        $this->symbol = $instrument->symbol;
     }
 
     /**
