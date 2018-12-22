@@ -3,9 +3,10 @@
 namespace MichaelDrennen\Robinhood\Responses\Accounts;
 
 use Carbon\Carbon;
+use MichaelDrennen\Robinhood\Responses\RobinhoodResponse;
 
 
-class Account {
+class Account extends RobinhoodResponse {
     public $rhs_account_number; // 234567898
     public $deactivated; // bool?
     public $updated_at; // 2018-07-15T11:01:01.111112Z

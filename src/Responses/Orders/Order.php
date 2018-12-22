@@ -3,9 +3,9 @@
 namespace MichaelDrennen\Robinhood\Responses\Orders;
 
 use Carbon\Carbon;
-use MichaelDrennen\Robinhood\Robinhood;
+use MichaelDrennen\Robinhood\Responses\RobinhoodResponseForInstrument;
 
-class Order {
+class Order extends RobinhoodResponseForInstrument {
 
     public $updated_at; // 2018-12-14T21:23:19.586667Z
     public $ref_id; //
@@ -34,6 +34,9 @@ class Order {
     public $position; // https://api.robinhood.com/positions/6UB12345/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx/
     public $average_price; //
     public $quantity; // 1.00000
+
+    // Denormalized properties. These contain data that exist in other properties, but I want in a different format.
+    public $instrumentId;
 
     //
     public $symbol;
@@ -66,26 +69,6 @@ class Order {
         $this->position                  = (string)$result[ 'position' ];
         $this->average_price             = $result[ 'average_price' ];
         $this->quantity                  = (float)$result[ 'quantity' ];
-    }
-
-
-    /**
-     * @param \MichaelDrennen\Robinhood\Robinhood $robinhood
-     * @throws \GuzzleHttp\Exception\GuzzleException
-     */
-    public function addSymbol( Robinhood $robinhood ) {
-        $instrumentId = $this->id;
-        /**
-         * @var \MichaelDrennen\Robinhood\Responses\Instruments\Instrument $instrument
-         */
-        try {
-            $instrument   = $robinhood->instrument( $instrumentId );
-            $this->symbol = $instrument->symbol;
-        } catch ( \Exception $exception ) {
-            $this->symbol = NULL;
-            throw $exception;
-        }
-
     }
 
 }

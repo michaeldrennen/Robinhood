@@ -2,15 +2,9 @@
 
 namespace MichaelDrennen\Robinhood\Responses\Orders;
 
-use MichaelDrennen\Robinhood\Responses\RobinhoodResponse;
-use MichaelDrennen\Robinhood\Robinhood;
+use MichaelDrennen\Robinhood\Responses\RobinhoodResponseForInstruments;
 
-class Orders extends RobinhoodResponse {
-
-    /**
-     * @var array An array of Order objects.
-     */
-    public $orders = [];
+class Orders extends RobinhoodResponseForInstruments {
 
 
     /**
@@ -20,7 +14,7 @@ class Orders extends RobinhoodResponse {
      */
     public function __construct( array $response ) {
         foreach ( $response[ 'results' ] as $i => $result ):
-            $this->orders[] = new Order( $result );
+            $this->objects[] = new Order( $result );
         endforeach;
     }
 
@@ -36,32 +30,12 @@ class Orders extends RobinhoodResponse {
         /**
          * @var $order \MichaelDrennen\Robinhood\Responses\Orders\Order
          */
-        foreach ( $this->orders as $order ):
+        foreach ( $this->objects as $order ):
             if ( empty( $order->executions ) ):
                 $unexecutedOrders[] = $order;
             endif;
         endforeach;
-        $this->orders = $unexecutedOrders;
+        $this->objects = $unexecutedOrders;
         return $this;
     }
-
-    /**
-     * @param \MichaelDrennen\Robinhood\Robinhood $robinhood
-     * @return $this
-     */
-    public function addSymbols( Robinhood $robinhood ) {
-        /**
-         * @var \MichaelDrennen\Robinhood\Responses\Orders\Order $order
-         */
-        foreach ( $this->orders as $i => $order ):
-            try {
-                $this->orders[ $i ]->addSymbol( $robinhood );
-            } catch ( \Exception $exception ) {
-                $this->addException( $exception );
-            }
-        endforeach;
-        return $this;
-    }
-
-
 }

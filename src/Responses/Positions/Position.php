@@ -3,9 +3,10 @@
 namespace MichaelDrennen\Robinhood\Responses\Positions;
 
 use Carbon\Carbon;
+use MichaelDrennen\Robinhood\Responses\RobinhoodResponseForInstrument;
 use MichaelDrennen\Robinhood\Robinhood;
 
-class Position {
+class Position extends RobinhoodResponseForInstrument {
 
     public $shares_held_for_stock_grants; // 0.0000
     public $account; // https://api.robinhood.com/accounts/XXXXXXXX/
@@ -28,12 +29,8 @@ class Position {
     public $shares_pending_from_options_events; // 0.0000
     public $quantity; // 1.0000
 
-    // Denormalized properties. These contain data that exist in other properties, but I want in a different format.
-    public $instrumentId;
 
     // Related properties. These contain data that can only be retrieved through other API calls.
-    public $symbol;
-    public $lastTradePrice;
     public $marketValueFromLastTradePrice;
 
 
@@ -95,15 +92,12 @@ class Position {
     }
 
     /**
-     * @param \MichaelDrennen\Robinhood\Robinhood $robinhood
-     * @throws \GuzzleHttp\Exception\GuzzleException
+     * @throws \Exception
      */
-    public function addLastTradePrice( Robinhood $robinhood ) {
-        /**
-         * @var \MichaelDrennen\Robinhood\Responses\Quotes\Quote $quote
-         */
-        $quote                               = $robinhood->quote( $this->symbol );
-        $this->lastTradePrice                = $quote->last_trade_price;
+    public function addMarketValueFromLastTradePrice() {
+        if ( ! isset( $this->lastTradePrice ) ):
+            throw new \Exception( "You need to call addLastTradePrice() first before you calculate the market value." );
+        endif;
         $this->marketValueFromLastTradePrice = $this->lastTradePrice * $this->quantity;
     }
 

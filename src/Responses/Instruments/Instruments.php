@@ -2,13 +2,18 @@
 
 namespace MichaelDrennen\Robinhood\Responses\Instruments;
 
-class Instruments {
-    public $instruments = [];
+use MichaelDrennen\Robinhood\Responses\RobinhoodResponseForInstruments;
+
+class Instruments extends RobinhoodResponseForInstruments {
 
 
+    /**
+     * Instruments constructor.
+     * @param array $robinhoodResponse
+     */
     public function __construct( array $robinhoodResponse ) {
         foreach ( $robinhoodResponse[ 'results' ] as $result ):
-            $this->instruments[] = new Instrument( $result );
+            $this->objects[] = new Instrument( $result );
         endforeach;
     }
 

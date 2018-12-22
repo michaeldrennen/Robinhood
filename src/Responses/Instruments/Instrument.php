@@ -3,13 +3,13 @@
 namespace MichaelDrennen\Robinhood\Responses\Instruments;
 
 use Carbon\Carbon;
-use MichaelDrennen\Robinhood\Robinhood;
+use MichaelDrennen\Robinhood\Responses\RobinhoodResponseForInstrument;
 
 /**
  * Class Instrument
  * @package MichaelDrennen\Robinhood\Responses\Instruments
  */
-class Instrument {
+class Instrument extends RobinhoodResponseForInstrument {
 
     public $margin_initial_ratio; // 0.8000
     public $rhs_tradability; // tradable
@@ -58,8 +58,4 @@ class Instrument {
         $this->bloomberg_unique     = (string)$result[ 'bloomberg_unique' ];
         $this->list_date            = Carbon::parse( $result[ 'list_date' ] );
     }
-
-
-
-
 }

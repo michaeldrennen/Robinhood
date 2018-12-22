@@ -80,13 +80,12 @@ class Robinhood {
         $clientId = $this->getClientId();
 
         $options = [
-//            'debug' => true,
-'form_params' => [
-    'username'   => $username,
-    'password'   => $password,
-    'grant_type' => 'password',
-    'client_id'  => $clientId,
-],
+            'form_params' => [
+                'username'   => $username,
+                'password'   => $password,
+                'grant_type' => 'password',
+                'client_id'  => $clientId,
+            ],
         ];
 
         $response          = $this->guzzle->request( 'POST', $url, $options );
@@ -155,7 +154,7 @@ class Robinhood {
      * @throws \GuzzleHttp\Exception\GuzzleException
      * @throws \Exception
      */
-    public function positions() {
+    public function positions(): Positions {
         $url               = '/positions/';
         $response          = $this->guzzle->request( 'GET', $url );
         $body              = $response->getBody();
@@ -451,7 +450,7 @@ class Robinhood {
         /**
          * @var $instrument \MichaelDrennen\Robinhood\Responses\Instruments\Instrument
          */
-        foreach ( $instruments->instruments as $instrument ):
+        foreach ( $instruments->objects as $instrument ):
             if ( $ticker == $instrument->symbol ):
                 return $instrument->url;
             endif;

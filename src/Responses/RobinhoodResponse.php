@@ -3,6 +3,8 @@
 namespace MichaelDrennen\Robinhood\Responses;
 
 
+use MichaelDrennen\Robinhood\Robinhood;
+
 class RobinhoodResponse {
 
     protected $exceptions = [];
@@ -22,4 +24,22 @@ class RobinhoodResponse {
         endif;
         return FALSE;
     }
+
+    /**
+     * The instrument id is available in the instrument field, but there are circumstances where I want the instrument
+     * id by itself. This function uses a regular expression to parse it out.
+     * @param string $instrument Ex: https://api.robinhood.com/instruments/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx/
+     * @return string Ex: xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
+     * @throws \Exception
+     */
+    protected function getInstrumentIdFromInstrument( string $instrument ): string {
+        $regexPattern = '/.*\/(.*)\/$/';
+        preg_match( $regexPattern, $instrument, $matches );
+        if ( ! isset( $matches[ 1 ] ) ):
+            throw new \Exception( "Unable to find the instrument id from this string: " . $instrument );
+        endif;
+        return $matches[ 1 ];
+    }
+
+    
 }
