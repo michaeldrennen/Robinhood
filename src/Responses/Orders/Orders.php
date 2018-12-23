@@ -31,7 +31,7 @@ class Orders extends RobinhoodResponseForInstruments {
          * @var $order \MichaelDrennen\Robinhood\Responses\Orders\Order
          */
         foreach ( $this->objects as $order ):
-            if ( empty( $order->executions ) ):
+            if ( empty( $order->executions->executions ) ):
                 $unexecutedOrders[] = $order;
             endif;
         endforeach;

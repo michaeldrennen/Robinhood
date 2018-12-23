@@ -57,5 +57,8 @@ class Instrument extends RobinhoodResponseForInstrument {
         $this->country              = (string)$result[ 'country' ];
         $this->bloomberg_unique     = (string)$result[ 'bloomberg_unique' ];
         $this->list_date            = Carbon::parse( $result[ 'list_date' ] );
+
+        // Denormalized to make other code cleaner.
+        $this->instrumentId = $this->id;
     }
 }

@@ -16,7 +16,7 @@ class Quotes {
      * @throws \Exception
      */
     public function __construct( array $response ) {
-        foreach ( $response as $i => $result ):
+        foreach ( $response[ 'results' ] as $i => $result ):
             $this->quotes[] = new Quote( $result );
         endforeach;
     }

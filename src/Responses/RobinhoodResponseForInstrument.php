@@ -16,51 +16,22 @@ class RobinhoodResponseForInstrument extends RobinhoodResponse {
 
 
     /**
-     * Hopefully this is only a temporary function. There was a corporate action where ETP merged with ET. If you held a
-     * position with ETP, that would still show up when you call positions(), but will not show up if you ask
-     * for quote().
-     * @param string $ticker
-     * @return string
-     */
-    protected function translateTicker( string $ticker ): string {
-        $ticker = strtoupper( $ticker );
-        switch ( $ticker ):
-            case 'ETP':
-                return 'ET';
-        endswitch;
-        return $ticker;
-    }
-
-    /**
-     * The instrument id is available in the instrument field, but there are circumstances where I want the instrument
-     * id by itself. This function uses a regular expression to parse it out.
-     * Call this from the child's constructor.
-     * @param string $instrument Ex: https://api.robinhood.com/instruments/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx/
-     * @return string Ex: xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
-     * @throws \Exception
-     */
-    protected function getInstrumentIdFromInstrument( string $instrument ): string {
-        $regexPattern = '/.*\/(.*)\/$/';
-        preg_match( $regexPattern, $instrument, $matches );
-        if ( ! isset( $matches[ 1 ] ) ):
-            throw new \Exception( "Unable to find the instrument id from this string: " . $instrument );
-        endif;
-        return $matches[ 1 ];
-    }
-
-
-    /**
      * @param \MichaelDrennen\Robinhood\Robinhood $robinhood Pass this in so I can use the same security token.
      * @throws \GuzzleHttp\Exception\GuzzleException
+     * @throws \Exception
      */
     public function addSymbol( Robinhood $robinhood ) {
+        if ( is_null( $this->instrumentId ) ):
+            throw new \Exception( "You need to set the instrumentId before you call addSymbol()" );
+        endif;
+
         $instrumentId = $this->instrumentId;
 
         /**
          * @var \MichaelDrennen\Robinhood\Responses\Instruments\Instrument $instrument
          */
         $instrument   = $robinhood->instrument( $instrumentId );
-        $this->symbol = $this->translateTicker( $instrument->symbol );
+        $this->symbol = Robinhood::translateTicker( $instrument->symbol );
     }
 
     /**

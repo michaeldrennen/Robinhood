@@ -2,9 +2,6 @@
 
 namespace MichaelDrennen\Robinhood\Responses;
 
-
-use MichaelDrennen\Robinhood\Robinhood;
-
 class RobinhoodResponse {
 
     protected $exceptions = [];
@@ -28,6 +25,7 @@ class RobinhoodResponse {
     /**
      * The instrument id is available in the instrument field, but there are circumstances where I want the instrument
      * id by itself. This function uses a regular expression to parse it out.
+     * Call this from the child's constructor.
      * @param string $instrument Ex: https://api.robinhood.com/instruments/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx/
      * @return string Ex: xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
      * @throws \Exception
@@ -41,5 +39,5 @@ class RobinhoodResponse {
         return $matches[ 1 ];
     }
 
-    
+
 }

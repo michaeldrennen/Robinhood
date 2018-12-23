@@ -11,6 +11,7 @@ use MichaelDrennen\Robinhood\Responses\Orders\Order;
 use MichaelDrennen\Robinhood\Responses\Orders\Orders;
 use MichaelDrennen\Robinhood\Responses\Positions\Positions;
 use MichaelDrennen\Robinhood\Responses\Quotes\Quote;
+use MichaelDrennen\Robinhood\Responses\Quotes\Quotes;
 
 class Robinhood {
     protected $guzzle;
@@ -29,6 +30,21 @@ class Robinhood {
     public $mainAccountId;
     public $mainAccountUrl; // Needed for orders.
 
+    /**
+     * Hopefully this is only a temporary function. There was a corporate action where ETP merged with ET. If you held a
+     * position with ETP, that would still show up when you call positions(), but will not show up if you ask
+     * for quote().
+     * @param string $ticker
+     * @return string
+     */
+    public static function translateTicker( string $ticker ): string {
+        $ticker = strtoupper( $ticker );
+        switch ( $ticker ):
+            case 'ETP':
+                return 'ET';
+        endswitch;
+        return $ticker;
+    }
 
     /**
      * Robinhood constructor.
@@ -63,8 +79,12 @@ class Robinhood {
         endif;
 
         $options = [
-            'base_uri' => 'https://api.robinhood.com',
-            'headers'  => $headers ];
+
+            'allow_redirects' => [
+                'strict' => TRUE,
+            ],
+            'base_uri'        => 'https://api.robinhood.com',
+            'headers'         => $headers ];
         return new Client( $options );
     }
 
@@ -203,7 +223,7 @@ class Robinhood {
     public function instrumentsBySymbol( string $symbol ): Instruments {
         $url               = '/instruments/';
         $response          = $this->guzzle->request( 'GET', $url, [
-            'query' => [ 'symbol' => strtoupper( $symbol ) ],
+            'query' => [ 'symbol' => Robinhood::translateTicker( $symbol ) ],
         ] );
         $body              = $response->getBody();
         $robinhoodResponse = \GuzzleHttp\json_decode( $body->getContents(), TRUE );
@@ -307,13 +327,12 @@ class Robinhood {
      * @return \MichaelDrennen\Robinhood\Responses\Orders\Order Is this what is really returned?
      * @throws \GuzzleHttp\Exception\GuzzleException
      */
-    public function cancelOrder( string $orderId ): Order {
+    public function cancelOrder( string $orderId ) {
         $url               = '/orders/' . $orderId . '/cancel';
         $response          = $this->guzzle->request( 'POST', $url );
         $body              = $response->getBody();
         $robinhoodResponse = \GuzzleHttp\json_decode( $body->getContents(), TRUE );
-
-        return new Order( $robinhoodResponse );
+        return $robinhoodResponse;
     }
 
 
@@ -328,6 +347,7 @@ class Robinhood {
      * @throws \Exception
      */
     public function marketBuy( string $accountUrl, string $ticker, int $shares, bool $extendedHours = FALSE ) {
+        $ticker           = Robinhood::translateTicker( $ticker );
         $instrumentUrl    = $this->getInstrumentUrlFromTicker( $ticker );
         $bidPrice         = $this->getBidPriceFromTicker( $ticker );
         $adjustedBidPrice = $this->getAdjustedBidPrice( $bidPrice );
@@ -402,6 +422,7 @@ class Robinhood {
      * @throws \GuzzleHttp\Exception\GuzzleException
      */
     public function marketSell( string $account, string $ticker, int $shares, float $stopPrice = NULL, bool $extendedHours = FALSE ) {
+        $ticker            = Robinhood::translateTicker( $ticker );
         $instrumentUrl     = $this->getInstrumentUrlFromTicker( $ticker );
         $askPrice          = $this->getAskPriceFromTicker( $ticker );
         $adjustedStopPrice = $this->getAdjustedStopPrice( $askPrice );
@@ -445,11 +466,32 @@ class Robinhood {
      * @throws \GuzzleHttp\Exception\GuzzleException
      */
     public function quote( string $ticker ): Quote {
+        $ticker            = Robinhood::translateTicker( $ticker );
         $url               = '/quotes/' . $ticker . '/';
         $response          = $this->guzzle->request( 'GET', $url );
         $body              = $response->getBody();
         $robinhoodResponse = \GuzzleHttp\json_decode( $body->getContents(), TRUE );
         return new Quote( $robinhoodResponse );
+    }
+
+
+    /**
+     * @param array $tickers
+     * @return \MichaelDrennen\Robinhood\Responses\Quotes\Quotes
+     * @throws \GuzzleHttp\Exception\GuzzleException
+     */
+    public function quotesForTickers( array $tickers ): Quotes {
+        foreach ( $tickers as $i => $ticker ):
+            $tickers[ $i ] = Robinhood::translateTicker( $ticker );
+        endforeach;
+        $csvTickers        = implode( ',', $tickers );
+        $url               = '/quotes/?symbols=' . $csvTickers;
+        $response          = $this->guzzle->request( 'GET', $url );
+        $body              = $response->getBody();
+        $contents          = $body->getContents();
+        $robinhoodResponse = \GuzzleHttp\json_decode( $contents, TRUE );
+
+        return new Quotes( $robinhoodResponse );
     }
 
     /**
@@ -459,7 +501,8 @@ class Robinhood {
      * @throws \Exception;
      */
     protected function getInstrumentUrlFromTicker( string $ticker ) {
-        $instruments = $this->instrumentsByQueryString( $ticker );
+        $ticker      = Robinhood::translateTicker( $ticker );
+        $instruments = $this->instrumentsBySymbol( $ticker );
 
         /**
          * @var $instrument \MichaelDrennen\Robinhood\Responses\Instruments\Instrument
@@ -478,7 +521,8 @@ class Robinhood {
      * @throws \GuzzleHttp\Exception\GuzzleException
      */
     protected function getBidPriceFromTicker( string $ticker ): float {
-        $quote = $this->quote( $ticker );
+        $ticker = Robinhood::translateTicker( $ticker );
+        $quote  = $this->quote( $ticker );
         return $quote->bid_price;
     }
 
@@ -488,7 +532,8 @@ class Robinhood {
      * @throws \GuzzleHttp\Exception\GuzzleException
      */
     protected function getAskPriceFromTicker( string $ticker ): float {
-        $quote = $this->quote( $ticker );
+        $ticker = Robinhood::translateTicker( $ticker );
+        $quote  = $this->quote( $ticker );
         return $quote->ask_price;
     }
 
