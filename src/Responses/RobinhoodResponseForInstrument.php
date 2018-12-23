@@ -14,6 +14,23 @@ class RobinhoodResponseForInstrument extends RobinhoodResponse {
     public $symbol;
     public $lastTradePrice;
 
+
+    /**
+     * Hopefully this is only a temporary function. There was a corporate action where ETP merged with ET. If you held a
+     * position with ETP, that would still show up when you call positions(), but will not show up if you ask
+     * for quote().
+     * @param string $ticker
+     * @return string
+     */
+    protected function translateTicker( string $ticker ): string {
+        $ticker = strtoupper( $ticker );
+        switch ( $ticker ):
+            case 'ETP':
+                return 'ET';
+        endswitch;
+        return $ticker;
+    }
+
     /**
      * The instrument id is available in the instrument field, but there are circumstances where I want the instrument
      * id by itself. This function uses a regular expression to parse it out.
@@ -38,11 +55,12 @@ class RobinhoodResponseForInstrument extends RobinhoodResponse {
      */
     public function addSymbol( Robinhood $robinhood ) {
         $instrumentId = $this->instrumentId;
+
         /**
          * @var \MichaelDrennen\Robinhood\Responses\Instruments\Instrument $instrument
          */
         $instrument   = $robinhood->instrument( $instrumentId );
-        $this->symbol = $instrument->symbol;
+        $this->symbol = $this->translateTicker( $instrument->symbol );
     }
 
     /**
@@ -54,6 +72,7 @@ class RobinhoodResponseForInstrument extends RobinhoodResponse {
         if ( ! isset( $this->symbol ) ):
             throw new \Exception( "You need to call addSymbol() before you call addLastTradePrice()" );
         endif;
+
         try {
             /**
              * @var \MichaelDrennen\Robinhood\Responses\Quotes\Quote $quote
@@ -61,7 +80,6 @@ class RobinhoodResponseForInstrument extends RobinhoodResponse {
             $quote                = $robinhood->quote( $this->symbol );
             $this->lastTradePrice = $quote->last_trade_price;
         } catch ( \Exception $exception ) {
-            print_r( $this->symbol );
             $this->lastTradePrice = NULL;
         }
 

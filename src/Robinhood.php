@@ -179,14 +179,31 @@ class Robinhood {
 
 
     /**
-     * @param string $queryString Ticker, company name, part of a company name or ticker, whatever.
+     * @param string $queryString Keyword used to search instruments. This keyword might be found in the name for
+     *                            example.
      * @return \MichaelDrennen\Robinhood\Responses\Instruments\Instruments
      * @throws \GuzzleHttp\Exception\GuzzleException
      */
-    public function instruments( string $queryString ): Instruments {
+    public function instrumentsByQueryString( string $queryString ): Instruments {
         $url               = '/instruments/';
         $response          = $this->guzzle->request( 'GET', $url, [
             'query' => [ 'query' => strtoupper( $queryString ) ],
+        ] );
+        $body              = $response->getBody();
+        $robinhoodResponse = \GuzzleHttp\json_decode( $body->getContents(), TRUE );
+
+        return new Instruments( $robinhoodResponse );
+    }
+
+    /**
+     * @param string $symbol The ticker of the stock
+     * @return \MichaelDrennen\Robinhood\Responses\Instruments\Instruments
+     * @throws \GuzzleHttp\Exception\GuzzleException
+     */
+    public function instrumentsBySymbol( string $symbol ): Instruments {
+        $url               = '/instruments/';
+        $response          = $this->guzzle->request( 'GET', $url, [
+            'query' => [ 'symbol' => strtoupper( $symbol ) ],
         ] );
         $body              = $response->getBody();
         $robinhoodResponse = \GuzzleHttp\json_decode( $body->getContents(), TRUE );
@@ -231,29 +248,29 @@ class Robinhood {
     //          time_in_force: options.time || 'gfd',
     //          trigger: options.trigger || 'immediate',
     //          type: options.type || 'market'
-    public function buy( string $account, string $ticker, int $shares ) {
-
-
-        $url               = '/orders/';
-        $response          = $this->guzzle->request( 'POST', $url,
-                                                     [
-                                                         'form_params' => [
-                                                             'account'       => $account,
-                                                             'instrument'    => $instrumentUrl,
-                                                             'price'         => $bidPrice,
-                                                             //
-                                                             'quantity'      => $shares,
-                                                             'side'          => 'buy',
-                                                             'symbol'        => $ticker,
-                                                             'time_in_force' => 'gfd',
-                                                             'trigger'       => 'immediate',
-                                                             'type'          => 'market',
-                                                         ],
-                                                     ] );
-        $body              = $response->getBody();
-        $robinhoodResponse = \GuzzleHttp\json_decode( $body->getContents(), TRUE );
-        return $robinhoodResponse;
-    }
+//    public function buy( string $account, string $ticker, int $shares ) {
+//
+//
+//        $url               = '/orders/';
+//        $response          = $this->guzzle->request( 'POST', $url,
+//                                                     [
+//                                                         'form_params' => [
+//                                                             'account'       => $account,
+//                                                             'instrument'    => $instrumentUrl,
+//                                                             'price'         => $bidPrice,
+//                                                             //
+//                                                             'quantity'      => $shares,
+//                                                             'side'          => 'buy',
+//                                                             'symbol'        => $ticker,
+//                                                             'time_in_force' => 'gfd',
+//                                                             'trigger'       => 'immediate',
+//                                                             'type'          => 'market',
+//                                                         ],
+//                                                     ] );
+//        $body              = $response->getBody();
+//        $robinhoodResponse = \GuzzleHttp\json_decode( $body->getContents(), TRUE );
+//        return $robinhoodResponse;
+//    }
 
 
     /**
@@ -276,10 +293,8 @@ class Robinhood {
      * @throws \GuzzleHttp\Exception\GuzzleException
      */
     public function getOrderInformation( string $orderId ): Order {
-        $url               = '/orders/';
-        $response          = $this->guzzle->request( 'GET', $url, [
-            'query' => [ 'query' => strtoupper( $orderId ) ],
-        ] );
+        $url               = '/orders/' . $orderId . '/';
+        $response          = $this->guzzle->request( 'GET', $url );
         $body              = $response->getBody();
         $robinhoodResponse = \GuzzleHttp\json_decode( $body->getContents(), TRUE );
 
@@ -294,7 +309,7 @@ class Robinhood {
      */
     public function cancelOrder( string $orderId ): Order {
         $url               = '/orders/' . $orderId . '/cancel';
-        $response          = $this->guzzle->request( 'GET', $url );
+        $response          = $this->guzzle->request( 'POST', $url );
         $body              = $response->getBody();
         $robinhoodResponse = \GuzzleHttp\json_decode( $body->getContents(), TRUE );
 
@@ -434,7 +449,6 @@ class Robinhood {
         $response          = $this->guzzle->request( 'GET', $url );
         $body              = $response->getBody();
         $robinhoodResponse = \GuzzleHttp\json_decode( $body->getContents(), TRUE );
-
         return new Quote( $robinhoodResponse );
     }
 
@@ -445,7 +459,7 @@ class Robinhood {
      * @throws \Exception;
      */
     protected function getInstrumentUrlFromTicker( string $ticker ) {
-        $instruments = $this->instruments( $ticker );
+        $instruments = $this->instrumentsByQueryString( $ticker );
 
         /**
          * @var $instrument \MichaelDrennen\Robinhood\Responses\Instruments\Instrument

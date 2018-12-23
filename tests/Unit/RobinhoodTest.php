@@ -4,13 +4,11 @@ namespace Tests\Unit;
 
 use Dotenv\Dotenv;
 use GuzzleHttp\Exception\ClientException;
-use MichaelDrennen\Robinhood\Responses\Instruments\Instrument;
 use MichaelDrennen\Robinhood\Responses\Positions\Position;
 use MichaelDrennen\Robinhood\Robinhood;
 use PHPUnit\Framework\TestCase;
 
 class RobinhoodTest extends TestCase {
-
 
     /**
      * @test
@@ -24,7 +22,17 @@ class RobinhoodTest extends TestCase {
     /**
      * @test
      */
-    public function validLoginShouldGrantAccessToken() {
+    public function callToUrlWhenNotLoggedInShouldThrowException() {
+        $this->expectException( \Exception::class );
+        $robinhood = new Robinhood();
+        $results   = $robinhood->url( 'https://api.robinhood.com/fundamentals/MSFT/' );
+    }
+
+
+    /**
+     * @test
+     */
+    public function validLoginShouldGrantAccessToken(): Robinhood {
         $dotenv = new Dotenv( __DIR__ );
         $dotenv->load();
         $robinhood = new Robinhood();
@@ -33,16 +41,15 @@ class RobinhoodTest extends TestCase {
         $refreshToken = $robinhood->getRefreshToken();
         $this->assertNotEmpty( $accessToken );
         $this->assertNotEmpty( $refreshToken );
+        return $robinhood;
     }
+
 
     /**
      * @test
+     * @depends validLoginShouldGrantAccessToken
      */
-    public function setMainAccountShouldSetAnId() {
-        $dotenv = new Dotenv( __DIR__ );
-        $dotenv->load();
-        $robinhood = new Robinhood();
-        $robinhood->login( getenv( 'USERNAME' ), getenv( 'PASSWORD' ) );
+    public function setMainAccountShouldSetAnId( Robinhood $robinhood ) {
         $robinhood->setMainAccountId();
         $mainAccountId  = $robinhood->mainAccountId;
         $mainAccountUrl = $robinhood->mainAccountUrl;
@@ -50,17 +57,17 @@ class RobinhoodTest extends TestCase {
         $this->assertNotEmpty( $mainAccountUrl );
     }
 
+
     /**
      * @test
+     * @depends validLoginShouldGrantAccessToken
      */
-    public function getPositionsShouldReturnAnArray() {
-        $dotenv = new Dotenv( __DIR__ );
-        $dotenv->load();
-        $robinhood = new Robinhood();
-        $robinhood->login( getenv( 'USERNAME' ), getenv( 'PASSWORD' ) );
+    public function getPositionsShouldReturnAnArray( Robinhood $robinhood ) {
         $positions = $robinhood->positions()
                                ->addSymbols( $robinhood )
-                               ->addLastTradePrices( $robinhood );
+                               ->addLastTradePrices( $robinhood )
+                               ->addMarketValueFromLastTradePrices( $robinhood );
+
         $this->assertNotEmpty( $positions );
 
         /**
@@ -69,9 +76,94 @@ class RobinhoodTest extends TestCase {
         foreach ( $positions->objects as $position ):
             $this->assertNotEmpty( $position->symbol );
         endforeach;
-
-
     }
+
+
+    /**
+     * @test
+     * @depends validLoginShouldGrantAccessToken
+     */
+    public function getInstrumentsBySymbolShouldNotBeEmpty( Robinhood $robinhood ) {
+        /**
+         * @var \MichaelDrennen\Robinhood\Responses\Instruments\Instruments $instruments
+         */
+        $instruments = $robinhood->instrumentsBySymbol( 'LODE' );
+        $this->assertNotEmpty( $instruments->objects );
+    }
+
+
+    /**
+     * @test
+     * @depends validLoginShouldGrantAccessToken
+     */
+    public function getInstrumentsByQueryStringShouldNotBeEmpty( Robinhood $robinhood ) {
+        /**
+         * @var \MichaelDrennen\Robinhood\Responses\Instruments\Instruments $instruments
+         */
+        $instruments = $robinhood->instrumentsByQueryString( 'finance' );
+        $this->assertNotEmpty( $instruments->objects );
+    }
+
+
+    /**
+     * @test
+     * @depends validLoginShouldGrantAccessToken
+     */
+    public function getUrlShouldNotBeEmpty( Robinhood $robinhood ) {
+        $results = $robinhood->url( 'https://api.robinhood.com/fundamentals/MSFT/' );
+        $this->assertNotEmpty( $results );
+    }
+
+
+    /**
+     * @test
+     * @depends validLoginShouldGrantAccessToken
+     */
+    public function getRecentOrdersShouldNotBeEmpty( Robinhood $robinhood ) {
+        $recentOrdres = $robinhood->getRecentOrders();
+        $this->assertNotEmpty( $recentOrdres->objects );
+    }
+
+
+    /**
+     * @test
+     * @depends validLoginShouldGrantAccessToken
+     */
+    public function marketBuyShouldPlaceOrder( Robinhood $robinhood ) {
+        $order = $robinhood->marketBuy( $robinhood->mainAccountUrl, 'LODE', 1, FALSE );
+        $this->assertNotEmpty( $order->id );
+        return $order->id;
+    }
+
+    /**
+     * @test
+     * @depends marketBuyShouldPlaceOrder
+     */
+    public function getOrderInformationShouldNotBeEmpty( string $orderId ) {
+        $dotenv = new Dotenv( __DIR__ );
+        $dotenv->load();
+        $robinhood = new Robinhood();
+        $robinhood->login( getenv( 'USERNAME' ), getenv( 'PASSWORD' ) );
+        $order = $robinhood->getOrderInformation( $orderId );
+        $this->assertNotEmpty( $order->id );
+        return $orderId;
+    }
+
+
+    /**
+     * @test
+     * @depends marketBuyShouldPlaceOrder
+     */
+    public function cancelOrderShouldNotBeEmpty( string $orderId ) {
+        $dotenv = new Dotenv( __DIR__ );
+        $dotenv->load();
+        $robinhood = new Robinhood();
+        $robinhood->login( getenv( 'USERNAME' ), getenv( 'PASSWORD' ) );
+        $order = $robinhood->cancelOrder( $orderId );
+        $this->assertNotEmpty( $order->id );
+    }
+
+
 
 
     /**
@@ -80,7 +172,6 @@ class RobinhoodTest extends TestCase {
     public function login() {
 
 
-        print_r( $robinhood );
 //        $accounts = $robinhood->accounts();
 //        print_r( $accounts );
 //

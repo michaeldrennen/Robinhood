@@ -39,8 +39,10 @@ class RobinhoodResponseForInstruments extends RobinhoodResponse {
          */
         foreach ( $this->objects as $i => $object ):
             $this->objects[ $i ]->addLastTradePrice( $robinhood );
-            $this->objects[ $i ]->addMarketValueFromLastTradePrice( $robinhood );
         endforeach;
         return $this;
     }
+
+
+
 }

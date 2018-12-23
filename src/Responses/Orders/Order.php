@@ -69,6 +69,9 @@ class Order extends RobinhoodResponseForInstrument {
         $this->position                  = (string)$result[ 'position' ];
         $this->average_price             = $result[ 'average_price' ];
         $this->quantity                  = (float)$result[ 'quantity' ];
+
+        // Assign denormalized properties here.
+        $this->instrumentId = $this->getInstrumentIdFromInstrument( $this->instrument );
     }
 
 }

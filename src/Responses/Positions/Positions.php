@@ -3,6 +3,7 @@
 namespace MichaelDrennen\Robinhood\Responses\Positions;
 
 use MichaelDrennen\Robinhood\Responses\RobinhoodResponseForInstruments;
+use MichaelDrennen\Robinhood\Robinhood;
 
 class Positions extends RobinhoodResponseForInstruments {
 
@@ -35,6 +36,20 @@ class Positions extends RobinhoodResponseForInstruments {
             endif;
         endforeach;
         $this->objects = $nonZeroPositions;
+        return $this;
+    }
+
+    public function addMarketValueFromLastTradePrices( Robinhood $robinhood ) {
+        /**
+         * @var \MichaelDrennen\Robinhood\Responses\Positions\Position $object
+         */
+        foreach ( $this->objects as $i => $object ):
+            try{
+                $this->objects[ $i ]->addMarketValueFromLastTradePrice( $robinhood );
+            } catch (\Exception $exception){
+
+            }
+        endforeach;
         return $this;
     }
 
