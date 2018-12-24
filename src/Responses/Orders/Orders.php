@@ -38,4 +38,40 @@ class Orders extends RobinhoodResponseForInstruments {
         $this->objects = $unexecutedOrders;
         return $this;
     }
+
+    /**
+     * @return $this
+     */
+    public function cancelledOrders() {
+        $filledOrders = [];
+        /**
+         * @var $order \MichaelDrennen\Robinhood\Responses\Orders\Order
+         */
+        foreach ( $this->objects as $order ):
+            if ( 'cancelled' == $order->state ):
+                $filledOrders[] = $order;
+            endif;
+        endforeach;
+        $this->objects = $filledOrders;
+        return $this;
+    }
+
+    /**
+     * @return $this
+     */
+    public function filledOrders() {
+        $filledOrders = [];
+        /**
+         * @var $order \MichaelDrennen\Robinhood\Responses\Orders\Order
+         */
+        foreach ( $this->objects as $order ):
+            if ( 'filled' == $order->state ):
+                $filledOrders[] = $order;
+            endif;
+        endforeach;
+        $this->objects = $filledOrders;
+        return $this;
+    }
+
+
 }
