@@ -67,11 +67,31 @@ class Order extends RobinhoodResponseForInstrument {
         $this->side                      = (string)$result[ 'side' ];
         $this->override_day_trade_checks = $result[ 'override_day_trade_checks' ];
         $this->position                  = (string)$result[ 'position' ];
-        $this->average_price             = $result[ 'average_price' ];
+        $this->average_price = (float)$result[ 'average_price' ];
         $this->quantity                  = (float)$result[ 'quantity' ];
 
         // Assign denormalized properties here.
         $this->instrumentId = $this->getInstrumentIdFromInstrument( $this->instrument );
     }
+
+    public function wasFilled() {
+        if ( 'filled' == $this->state ):
+            return TRUE;
+        endif;
+        return FALSE;
+    }
+
+    public function proceeds(): float {
+        return (float)( $this->average_price * $this->quantity );
+    }
+
+    public function marketValueFromLastTradePrice(): float {
+        return (float)( $this->lastTradePrice * $this->quantity );
+    }
+
+    public function pnlFromLastTradePrice(): float {
+        return (float)( $this->marketValueFromLastTradePrice() - $this->proceeds() );
+    }
+
 
 }
