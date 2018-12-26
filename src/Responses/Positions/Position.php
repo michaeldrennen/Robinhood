@@ -60,6 +60,7 @@ class Position extends RobinhoodResponseForInstrument {
 
         // Assign denormalized properties here.
         $this->instrumentId = $this->getInstrumentIdFromInstrument( $this->instrument );
+        $this->costBasis    = (float)( $this->average_buy_price * $this->quantity ); // @TODO See if there is more to this calculation. Stock splits?
     }
 
 
@@ -73,9 +74,6 @@ class Position extends RobinhoodResponseForInstrument {
         $this->marketValueFromLastTradePrice = $this->lastTradePrice * $this->quantity;
     }
 
-    public function addCostBasis() {
-        $this->costBasis = (float)( $this->average_buy_price * $this->quantity );
-    }
 
     /**
      * @return bool True if this position has at least one share.
