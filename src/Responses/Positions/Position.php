@@ -32,6 +32,7 @@ class Position extends RobinhoodResponseForInstrument {
 
     // Related properties. These contain data that can only be retrieved through other API calls.
     public $marketValueFromLastTradePrice;
+    public $costBasis;
 
 
     /**
@@ -70,6 +71,10 @@ class Position extends RobinhoodResponseForInstrument {
             throw new \Exception( "You need to call addLastTradePrice() first before you calculate the market value." );
         endif;
         $this->marketValueFromLastTradePrice = $this->lastTradePrice * $this->quantity;
+    }
+
+    public function addCostBasis() {
+        $this->costBasis = (float)( $this->average_buy_price * $this->quantity );
     }
 
     /**
