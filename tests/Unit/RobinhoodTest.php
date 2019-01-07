@@ -2,6 +2,7 @@
 
 namespace Tests\Unit;
 
+use Carbon\Carbon;
 use Dotenv\Dotenv;
 use GuzzleHttp\Exception\ClientException;
 use MichaelDrennen\Robinhood\Responses\Accounts\Accounts;
@@ -111,6 +112,7 @@ class RobinhoodTest extends TestCase {
      * @group  logged_in_failures
      * @group  not_trading
      * @group  quotes
+     * @group  markets
      */
     public function validLoginShouldGrantAccessToken(): Robinhood {
         $dotenv = new Dotenv( __DIR__ );
@@ -137,6 +139,38 @@ class RobinhoodTest extends TestCase {
         $mainAccountUrl = $robinhood->mainAccountUrl;
         $this->assertNotEmpty( $mainAccountId );
         $this->assertNotEmpty( $mainAccountUrl );
+    }
+
+
+    /**
+     * @test
+     * @depends validLoginShouldGrantAccessToken
+     * @group   markets
+     */
+    public function getMarketsShouldNotBeEmpty( Robinhood $robinhood ) {
+        $markets = $robinhood->markets();
+        $this->assertNotEmpty( $markets->markets );
+    }
+
+    /**
+     * @test
+     * @depends validLoginShouldGrantAccessToken
+     * @group   markets
+     */
+    public function getMarketShouldNotBeEmpty( Robinhood $robinhood ) {
+        $market = $robinhood->market( 'XASE' );
+        $this->assertNotEmpty( $market->name );
+    }
+
+    /**
+     * @test
+     * @depends validLoginShouldGrantAccessToken
+     * @group   markets
+     */
+    public function getMarketHoursShouldNotBeEmpty( Robinhood $robinhood ) {
+        $marketHours = $robinhood->marketHours( 'XASE', Carbon::parse( '2019-01-04' ) );
+        print_r( $marketHours );
+        $this->assertNotEmpty( $marketHours->name );
     }
 
     /**

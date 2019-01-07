@@ -46,7 +46,7 @@ class RobinhoodResponseForInstrument extends RobinhoodResponse {
 
         try {
             /**
-             * @var \MichaelDrennen\Robinhood\Responses\Quotes\Quote $quote
+             * @var \MichaelDrennen\Robinhood\Responses\Quotes\Market $quote
              */
             $quote                = $robinhood->quote( $this->symbol );
             $this->lastTradePrice = $quote->last_trade_price;

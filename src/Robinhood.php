@@ -3,6 +3,7 @@
 namespace MichaelDrennen\Robinhood;
 
 
+use Carbon\Carbon;
 use GuzzleHttp\Client;
 use MichaelDrennen\Robinhood\Responses\Accounts\Accounts;
 use MichaelDrennen\Robinhood\Responses\Instruments\Instrument;
@@ -12,6 +13,9 @@ use MichaelDrennen\Robinhood\Responses\Orders\Orders;
 use MichaelDrennen\Robinhood\Responses\Positions\Positions;
 use MichaelDrennen\Robinhood\Responses\Quotes\Quote;
 use MichaelDrennen\Robinhood\Responses\Quotes\Quotes;
+use MichaelDrennen\Robinhood\Responses\Markets\Market;
+use MichaelDrennen\Robinhood\Responses\Markets\Markets;
+use MichaelDrennen\Robinhood\Responses\Markets\MarketHours;
 
 class Robinhood {
     protected $guzzle;
@@ -112,7 +116,7 @@ class Robinhood {
         $body              = $response->getBody();
         $robinhoodResponse = \GuzzleHttp\json_decode( $body->getContents(), TRUE );
 
-        $this->accessToken  = $robinhoodResponse[ 'access_token' ];
+        $this->accessToken = $robinhoodResponse[ 'access_token' ];
         $this->expiresIn    = $robinhoodResponse[ 'expires_in' ];
         $this->tokenType    = $robinhoodResponse[ 'token_type' ];
         $this->scope        = $robinhoodResponse[ 'scope' ];
@@ -125,6 +129,7 @@ class Robinhood {
     /**
      * @return mixed
      * @throws \GuzzleHttp\Exception\GuzzleException
+     * @throws \Exception
      */
     protected function getClientId() {
         $client   = new Client( [] );
@@ -492,6 +497,37 @@ class Robinhood {
         $robinhoodResponse = \GuzzleHttp\json_decode( $contents, TRUE );
 
         return new Quotes( $robinhoodResponse );
+    }
+
+
+    public function markets(): Markets {
+        $url               = '/markets/';
+        $response          = $this->guzzle->request( 'GET', $url );
+        $body              = $response->getBody();
+        $contents          = $body->getContents();
+        $robinhoodResponse = \GuzzleHttp\json_decode( $contents, TRUE );
+
+        return new Markets( $robinhoodResponse );
+    }
+
+    public function market( string $mic ): Market {
+        $url               = '/markets/' . $mic;
+        $response          = $this->guzzle->request( 'GET', $url );
+        $body              = $response->getBody();
+        $contents          = $body->getContents();
+        $robinhoodResponse = \GuzzleHttp\json_decode( $contents, TRUE );
+
+        return new Market( $robinhoodResponse );
+    }
+
+    public function marketHours( string $mic, Carbon $date ): MarketHours {
+        $url               = '/markets/' . $mic . '/hours/' . $date->toDateString();
+        $response          = $this->guzzle->request( 'GET', $url );
+        $body              = $response->getBody();
+        $contents          = $body->getContents();
+        $robinhoodResponse = \GuzzleHttp\json_decode( $contents, TRUE );
+
+        return new MarketHours( $robinhoodResponse );
     }
 
     /**

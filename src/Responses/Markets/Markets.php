@@ -1,13 +1,13 @@
 <?php
 
-namespace MichaelDrennen\Robinhood\Responses\Quotes;
+namespace MichaelDrennen\Robinhood\Responses\Markets;
 
-class Quotes {
+class Markets {
 
     /**
      * @var array An array of Quote objects.
      */
-    public $quotes = [];
+    public $markets = [];
 
 
     /**
@@ -17,7 +17,7 @@ class Quotes {
      */
     public function __construct( array $response ) {
         foreach ( $response[ 'results' ] as $i => $result ):
-            $this->quotes[] = new Market( $result );
+            $this->markets[] = new Market( $result );
         endforeach;
     }
 }
