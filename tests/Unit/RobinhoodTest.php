@@ -169,8 +169,7 @@ class RobinhoodTest extends TestCase {
      */
     public function getMarketHoursShouldNotBeEmpty( Robinhood $robinhood ) {
         $marketHours = $robinhood->marketHours( 'XASE', Carbon::parse( '2019-01-04' ) );
-        print_r( $marketHours );
-        $this->assertNotEmpty( $marketHours->name );
+        $this->assertNotEmpty( $marketHours->next_open_hours );
     }
 
     /**
