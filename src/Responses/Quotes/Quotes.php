@@ -17,7 +17,7 @@ class Quotes {
      */
     public function __construct( array $response ) {
         foreach ( $response[ 'results' ] as $i => $result ):
-            $this->quotes[] = new Market( $result );
+            $this->quotes[] = new Quote( $result );
         endforeach;
     }
 }
