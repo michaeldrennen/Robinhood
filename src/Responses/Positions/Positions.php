@@ -44,13 +44,32 @@ class Positions extends RobinhoodResponseForInstruments {
          * @var \MichaelDrennen\Robinhood\Responses\Positions\Position $object
          */
         foreach ( $this->objects as $i => $object ):
-            try{
+            try {
                 $this->objects[ $i ]->addMarketValueFromLastTradePrice( $robinhood );
-            } catch (\Exception $exception){
+            } catch ( \Exception $exception ) {
 
             }
         endforeach;
         return $this;
+    }
+
+    /**
+     * @return float
+     * @throws \Exception
+     */
+    public function getTotalMarketValueOfPositionsFromLastTradePrice(): float {
+        $totalMarketValueFromLastTradePrice = 0;
+        /**
+         * @var \MichaelDrennen\Robinhood\Responses\Positions\Position $object
+         */
+        foreach ( $this->objects as $object ):
+            if ( ! isset( $object->marketValueFromLastTradePrice ) ):
+                throw new \Exception( "You need to call addMarketValueFromLastTradePrices() before you call getTotalMarketValueOfPositionsFromLastTradePrice()" );
+            endif;
+
+            $totalMarketValueFromLastTradePrice += (float)$object->marketValueFromLastTradePrice;
+        endforeach;
+        return $totalMarketValueFromLastTradePrice;
     }
 
 }
