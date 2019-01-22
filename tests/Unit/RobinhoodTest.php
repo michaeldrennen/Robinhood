@@ -552,5 +552,15 @@ class RobinhoodTest extends TestCase {
         $this->assertTrue( $position->hasExceptions() );
     }
 
+    /**
+     * @test
+     * @group account_id
+     */
+    public function getAccountIdShouldReturnAnAccountId() {
+        $position  = new Position( $this->getSamplePositionDataForConstructor() );
+        $accountId = $position->getAccountId();
+        $this->assertEquals( 'ABC12345', $accountId );
+    }
+
 
 }

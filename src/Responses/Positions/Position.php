@@ -85,4 +85,12 @@ class Position extends RobinhoodResponseForInstrument {
         return FALSE;
     }
 
+    /**
+     * @return string Your account id parsed out of the URL to your account stored in the 'account' property.
+     */
+    public function getAccountId(): string {
+        $accountParts = explode( '/', $this->account );
+        return $accountParts[ 4 ];
+    }
+
 }
