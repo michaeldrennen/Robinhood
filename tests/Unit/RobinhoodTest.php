@@ -360,7 +360,7 @@ class RobinhoodTest extends TestCase {
      * @depends validLoginShouldGrantAccessToken
      */
     public function attemptToBuyStockOverOneDollarShouldTriggerLogicInGetBidPrice( Robinhood $robinhood ) {
-        $tickerOverOneDollar = 'ARQL';
+        $tickerOverOneDollar = 'ODT';
         $robinhood->setMainAccountId();
         $order = $robinhood->marketBuy( $robinhood->mainAccountUrl, $tickerOverOneDollar, 1 );
         $this->assertNotEmpty( $order->id );
@@ -374,7 +374,7 @@ class RobinhoodTest extends TestCase {
      * @depends validLoginShouldGrantAccessToken
      */
     public function attemptToSellStockOverOneDollarShouldTriggerLogicInGetBidPrice( Robinhood $robinhood ) {
-        $tickerOverOneDollar = 'ARQL';
+        $tickerOverOneDollar = 'ODT';
         $robinhood->setMainAccountId();
         $order = $robinhood->marketSell( $robinhood->mainAccountUrl, $tickerOverOneDollar, 1, FALSE );
         $this->assertNotEmpty( $order->id );
