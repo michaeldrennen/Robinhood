@@ -116,7 +116,7 @@ class Robinhood {
         $body              = $response->getBody();
         $robinhoodResponse = \GuzzleHttp\json_decode( $body->getContents(), TRUE );
 
-        $this->accessToken = $robinhoodResponse[ 'access_token' ];
+        $this->accessToken  = $robinhoodResponse[ 'access_token' ];
         $this->expiresIn    = $robinhoodResponse[ 'expires_in' ];
         $this->tokenType    = $robinhoodResponse[ 'token_type' ];
         $this->scope        = $robinhoodResponse[ 'scope' ];
@@ -347,15 +347,20 @@ class Robinhood {
      * @param string $ticker        Ex: LODE
      * @param int    $shares        How many shares you want to buy.
      * @param bool   $extendedHours Not sure this is required either...
+     * @param float  $bidPrice      The user can set their own bid price for this market buy.
      * @return \MichaelDrennen\Robinhood\Responses\Orders\Order
      * @throws \GuzzleHttp\Exception\GuzzleException
      * @throws \Exception
      */
-    public function marketBuy( string $accountUrl, string $ticker, int $shares, bool $extendedHours = FALSE ) {
-        $ticker           = Robinhood::translateTicker( $ticker );
-        $instrumentUrl    = $this->getInstrumentUrlFromTicker( $ticker );
-        $bidPrice         = $this->getBidPriceFromTicker( $ticker );
+    public function marketBuy( string $accountUrl, string $ticker, int $shares, bool $extendedHours = FALSE, float $bidPrice = NULL ) {
+        $ticker        = Robinhood::translateTicker( $ticker );
+        $instrumentUrl = $this->getInstrumentUrlFromTicker( $ticker );
+
+        if ( ! isset( $bidPrice ) ):
+            $bidPrice = $this->getBidPriceFromTicker( $ticker );
+        endif;
         $adjustedBidPrice = $this->getAdjustedBidPrice( $bidPrice );
+
 
         $url               = '/orders/';
         $response          = $this->guzzle->request( 'POST', $url,
@@ -421,15 +426,21 @@ class Robinhood {
      * @param string     $account
      * @param string     $ticker
      * @param int        $shares
-     * @param float|NULL $stopPrice
+     * @param float|NULL $stopPrice Set your own price for this market sell.
      * @param bool       $extendedHours
      * @return \MichaelDrennen\Robinhood\Responses\Orders\Order
      * @throws \GuzzleHttp\Exception\GuzzleException
      */
     public function marketSell( string $account, string $ticker, int $shares, float $stopPrice = NULL, bool $extendedHours = FALSE ) {
-        $ticker            = Robinhood::translateTicker( $ticker );
-        $instrumentUrl     = $this->getInstrumentUrlFromTicker( $ticker );
-        $askPrice          = $this->getAskPriceFromTicker( $ticker );
+        $ticker        = Robinhood::translateTicker( $ticker );
+        $instrumentUrl = $this->getInstrumentUrlFromTicker( $ticker );
+
+
+        if ( $stopPrice ):
+            $askPrice = $stopPrice;
+        else:
+            $askPrice = $this->getAskPriceFromTicker( $ticker );
+        endif;
         $adjustedStopPrice = $this->getAdjustedStopPrice( $askPrice );
 
         $url               = '/orders/';
