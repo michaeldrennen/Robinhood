@@ -135,7 +135,7 @@ class Robinhood {
         $client   = new Client( [] );
         $response = $client->request( 'GET', 'https://robinhood.com/login' );
         $body     = $response->getBody();
-        $pattern  = "/oauthClientId = '(.*)';/";
+        $pattern  = '/oauthClientId = "(.*)";/';
         preg_match( $pattern, $body, $matches );
         if ( empty( $matches ) ):
             throw new \Exception( "Unable to get the client id, so we can't login." );
