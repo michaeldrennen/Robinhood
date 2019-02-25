@@ -38,6 +38,7 @@ class MarketHours {
      */
     protected function getDateFromLink(string $urlToHours): Carbon {
         $urlParts   = explode('/', $urlToHours);
+        $urlParts   = array_filter($urlParts);
         $stringDate = end($urlParts);
         return Carbon::parse($stringDate);
     }
