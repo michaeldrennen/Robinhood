@@ -41,9 +41,9 @@ class Robinhood {
      * @param string $ticker
      * @return string
      */
-    public static function translateTicker( string $ticker ): string {
-        $ticker = strtoupper( $ticker );
-        switch ( $ticker ):
+    public static function translateTicker(string $ticker): string {
+        $ticker = strtoupper($ticker);
+        switch ($ticker):
             case 'ETP':
                 return 'ET';
         endswitch;
@@ -52,14 +52,14 @@ class Robinhood {
 
     /**
      * Robinhood constructor.
-     * @param string|NULL $accessToken  If you have already authenticated with the API, no need to login again. Pass
+     * @param string|NULL $accessToken If you have already authenticated with the API, no need to login again. Pass
      *                                  the access token into the constructor.
      * @param string|NULL $refreshToken I'm not implementing this yet, but I will soon.
      */
-    public function __construct( string $accessToken = NULL, string $refreshToken = NULL ) {
+    public function __construct(string $accessToken = NULL, string $refreshToken = NULL) {
         $this->accessToken  = $accessToken;
         $this->refreshToken = $refreshToken;
-        $this->guzzle       = $this->createGuzzleClient( $accessToken );
+        $this->guzzle       = $this->createGuzzleClient($accessToken);
     }
 
     public function getAccessToken() {
@@ -74,12 +74,12 @@ class Robinhood {
      * @param string|NULL $token
      * @return \GuzzleHttp\Client
      */
-    protected function createGuzzleClient( string $token = NULL ): Client {
+    protected function createGuzzleClient(string $token = NULL): Client {
 
-        $headers             = [];
-        $headers[ 'Accept' ] = 'application/json';
-        if ( $token ):
-            $headers[ 'Authorization' ] = 'Bearer ' . $token;
+        $headers           = [];
+        $headers['Accept'] = 'application/json';
+        if ($token):
+            $headers['Authorization'] = 'Bearer ' . $token;
         endif;
 
         $options = [
@@ -87,9 +87,9 @@ class Robinhood {
             'allow_redirects' => [
                 'strict' => TRUE,
             ],
-            'base_uri'        => 'https://api.robinhood.com',
-            'headers'         => $headers ];
-        return new Client( $options );
+            'base_uri' => 'https://api.robinhood.com',
+            'headers' => $headers];
+        return new Client($options);
     }
 
 
@@ -99,49 +99,57 @@ class Robinhood {
      * @throws \GuzzleHttp\Exception\GuzzleException
      * @throws \Exception
      */
-    public function login( string $username, string $password ) {
+    public function login(string $username, string $password) {
         $url      = '/oauth2/token/';
         $clientId = $this->getClientId();
 
         $options = [
             'form_params' => [
-                'username'   => $username,
-                'password'   => $password,
+                'username' => $username,
+                'password' => $password,
                 'grant_type' => 'password',
-                'client_id'  => $clientId,
+                'client_id' => $clientId,
             ],
         ];
 
-        $response          = $this->guzzle->request( 'POST', $url, $options );
+        $response          = $this->guzzle->request('POST', $url, $options);
         $body              = $response->getBody();
-        $robinhoodResponse = \GuzzleHttp\json_decode( $body->getContents(), TRUE );
+        $robinhoodResponse = \GuzzleHttp\json_decode($body->getContents(), TRUE);
 
-        $this->accessToken  = $robinhoodResponse[ 'access_token' ];
-        $this->expiresIn    = $robinhoodResponse[ 'expires_in' ];
-        $this->tokenType    = $robinhoodResponse[ 'token_type' ];
-        $this->scope        = $robinhoodResponse[ 'scope' ];
-        $this->refreshToken = $robinhoodResponse[ 'refresh_token' ];
-        $this->mfaCode      = $robinhoodResponse[ 'mfa_code' ];
-        $this->backupCode   = $robinhoodResponse[ 'backup_code' ];
-        $this->guzzle       = $this->createGuzzleClient( $this->accessToken );
+        $this->accessToken  = $robinhoodResponse['access_token'];
+        $this->expiresIn    = $robinhoodResponse['expires_in'];
+        $this->tokenType    = $robinhoodResponse['token_type'];
+        $this->scope        = $robinhoodResponse['scope'];
+        $this->refreshToken = $robinhoodResponse['refresh_token'];
+        $this->mfaCode      = $robinhoodResponse['mfa_code'];
+        $this->backupCode   = $robinhoodResponse['backup_code'];
+        $this->guzzle       = $this->createGuzzleClient($this->accessToken);
     }
 
     /**
+     * @TODO clean this up. They keep switching between single quotes and double quotes.
      * @return mixed
      * @throws \GuzzleHttp\Exception\GuzzleException
      * @throws \Exception
      */
     protected function getClientId() {
-        $client   = new Client( [] );
-        $response = $client->request( 'GET', 'https://robinhood.com/login' );
+        $client   = new Client([]);
+        $response = $client->request('GET', 'https://robinhood.com/login');
         $body     = $response->getBody();
-        //$pattern  = '/oauthClientId = "(.*)";/';
-        $pattern  = "/oauthClientId = '(.*)';/";
-        preg_match( $pattern, $body, $matches );
-        if ( empty( $matches ) ):
-            throw new \Exception( "Unable to get the client id, so we can't login." );
+
+        $pattern = "/oauthClientId = '(.*)';/";
+        preg_match($pattern, $body, $matches);
+        if (isset($matches[1])):
+            return $matches[1];
         endif;
-        return $matches[ 1 ];
+
+        $pattern = '/oauthClientId = "(.*)";/';
+        preg_match($pattern, $body, $matches);
+        if (isset($matches[1])):
+            return $matches[1];
+        endif;
+
+        throw new \Exception("Unable to get the client id, so we can't login.");
     }
 
     /**
@@ -149,10 +157,10 @@ class Robinhood {
      * @throws \GuzzleHttp\Exception\GuzzleException
      * @throws \Exception
      */
-    public function setMainAccountId( string $accountId = NULL ) {
+    public function setMainAccountId(string $accountId = NULL) {
         $this->accounts = $this->accounts();
 
-        if ( is_null( $accountId ) ):
+        if (is_null($accountId)):
             $this->mainAccountId  = $this->accounts->getMainAccountId();
             $this->mainAccountUrl = $this->accounts->getMainAccountUrl();
         endif;
@@ -164,10 +172,10 @@ class Robinhood {
      */
     public function accounts(): Accounts {
         $url               = '/accounts/';
-        $response          = $this->guzzle->request( 'GET', $url );
+        $response          = $this->guzzle->request('GET', $url);
         $body              = $response->getBody();
-        $robinhoodResponse = \GuzzleHttp\json_decode( $body->getContents(), TRUE );
-        return new Accounts( $robinhoodResponse );
+        $robinhoodResponse = \GuzzleHttp\json_decode($body->getContents(), TRUE);
+        return new Accounts($robinhoodResponse);
     }
 
     /**
@@ -182,10 +190,10 @@ class Robinhood {
      */
     public function positions(): Positions {
         $url               = '/positions/';
-        $response          = $this->guzzle->request( 'GET', $url );
+        $response          = $this->guzzle->request('GET', $url);
         $body              = $response->getBody();
-        $robinhoodResponse = \GuzzleHttp\json_decode( $body->getContents(), TRUE );
-        return new Positions( $robinhoodResponse );
+        $robinhoodResponse = \GuzzleHttp\json_decode($body->getContents(), TRUE);
+        return new Positions($robinhoodResponse);
     }
 
 
@@ -194,13 +202,13 @@ class Robinhood {
      * @return \MichaelDrennen\Robinhood\Responses\Instruments\Instrument
      * @throws \GuzzleHttp\Exception\GuzzleException
      */
-    public function instrument( string $instrumentId ): Instrument {
+    public function instrument(string $instrumentId): Instrument {
         $url               = '/instruments/' . $instrumentId;
-        $response          = $this->guzzle->request( 'GET', $url );
+        $response          = $this->guzzle->request('GET', $url);
         $body              = $response->getBody();
-        $robinhoodResponse = \GuzzleHttp\json_decode( $body->getContents(), TRUE );
+        $robinhoodResponse = \GuzzleHttp\json_decode($body->getContents(), TRUE);
 
-        return new Instrument( $robinhoodResponse );
+        return new Instrument($robinhoodResponse);
     }
 
 
@@ -210,15 +218,15 @@ class Robinhood {
      * @return \MichaelDrennen\Robinhood\Responses\Instruments\Instruments
      * @throws \GuzzleHttp\Exception\GuzzleException
      */
-    public function instrumentsByQueryString( string $queryString ): Instruments {
+    public function instrumentsByQueryString(string $queryString): Instruments {
         $url               = '/instruments/';
-        $response          = $this->guzzle->request( 'GET', $url, [
-            'query' => [ 'query' => strtoupper( $queryString ) ],
-        ] );
+        $response          = $this->guzzle->request('GET', $url, [
+            'query' => ['query' => strtoupper($queryString)],
+        ]);
         $body              = $response->getBody();
-        $robinhoodResponse = \GuzzleHttp\json_decode( $body->getContents(), TRUE );
+        $robinhoodResponse = \GuzzleHttp\json_decode($body->getContents(), TRUE);
 
-        return new Instruments( $robinhoodResponse );
+        return new Instruments($robinhoodResponse);
     }
 
     /**
@@ -226,15 +234,15 @@ class Robinhood {
      * @return \MichaelDrennen\Robinhood\Responses\Instruments\Instruments
      * @throws \GuzzleHttp\Exception\GuzzleException
      */
-    public function instrumentsBySymbol( string $symbol ): Instruments {
+    public function instrumentsBySymbol(string $symbol): Instruments {
         $url               = '/instruments/';
-        $response          = $this->guzzle->request( 'GET', $url, [
-            'query' => [ 'symbol' => Robinhood::translateTicker( $symbol ) ],
-        ] );
+        $response          = $this->guzzle->request('GET', $url, [
+            'query' => ['symbol' => Robinhood::translateTicker($symbol)],
+        ]);
         $body              = $response->getBody();
-        $robinhoodResponse = \GuzzleHttp\json_decode( $body->getContents(), TRUE );
+        $robinhoodResponse = \GuzzleHttp\json_decode($body->getContents(), TRUE);
 
-        return new Instruments( $robinhoodResponse );
+        return new Instruments($robinhoodResponse);
     }
 
     /**
@@ -245,20 +253,20 @@ class Robinhood {
      * @throws \GuzzleHttp\Exception\GuzzleException
      * @throws \Exception
      */
-    public function url( string $url ): array {
-        $headers             = [];
-        $headers[ 'Accept' ] = 'application/json';
-        if ( ! $this->accessToken ):
-            throw new \Exception( "You need to login and get an access token before you can fire off this function." );
+    public function url(string $url): array {
+        $headers           = [];
+        $headers['Accept'] = 'application/json';
+        if (!$this->accessToken):
+            throw new \Exception("You need to login and get an access token before you can fire off this function.");
         endif;
-        $headers[ 'Authorization' ] = 'Bearer ' . $this->accessToken;
-        $options                    = [
+        $headers['Authorization'] = 'Bearer ' . $this->accessToken;
+        $options                  = [
             'headers' => $headers,
         ];
-        $guzzleClient               = new Client( $options );
-        $response                   = $guzzleClient->request( 'GET', $url );
-        $body                       = $response->getBody();
-        $robinhoodResponse          = \GuzzleHttp\json_decode( $body->getContents(), TRUE );
+        $guzzleClient             = new Client($options);
+        $response                 = $guzzleClient->request('GET', $url);
+        $body                     = $response->getBody();
+        $robinhoodResponse        = \GuzzleHttp\json_decode($body->getContents(), TRUE);
         return $robinhoodResponse;
     }
 
@@ -306,11 +314,11 @@ class Robinhood {
      */
     public function getRecentOrders(): Orders {
         $url               = '/orders/';
-        $response          = $this->guzzle->request( 'GET', $url );
+        $response          = $this->guzzle->request('GET', $url);
         $body              = $response->getBody();
-        $robinhoodResponse = \GuzzleHttp\json_decode( $body->getContents(), TRUE );
+        $robinhoodResponse = \GuzzleHttp\json_decode($body->getContents(), TRUE);
 
-        return new Orders( $robinhoodResponse );
+        return new Orders($robinhoodResponse);
     }
 
     /**
@@ -318,13 +326,13 @@ class Robinhood {
      * @return \MichaelDrennen\Robinhood\Responses\Orders\Order
      * @throws \GuzzleHttp\Exception\GuzzleException
      */
-    public function getOrderInformation( string $orderId ): Order {
+    public function getOrderInformation(string $orderId): Order {
         $url               = '/orders/' . $orderId . '/';
-        $response          = $this->guzzle->request( 'GET', $url );
+        $response          = $this->guzzle->request('GET', $url);
         $body              = $response->getBody();
-        $robinhoodResponse = \GuzzleHttp\json_decode( $body->getContents(), TRUE );
+        $robinhoodResponse = \GuzzleHttp\json_decode($body->getContents(), TRUE);
 
-        return new Order( $robinhoodResponse );
+        return new Order($robinhoodResponse);
     }
 
     /**
@@ -333,55 +341,55 @@ class Robinhood {
      * @return \MichaelDrennen\Robinhood\Responses\Orders\Order Is this what is really returned?
      * @throws \GuzzleHttp\Exception\GuzzleException
      */
-    public function cancelOrder( string $orderId ) {
+    public function cancelOrder(string $orderId) {
         $url               = '/orders/' . $orderId . '/cancel';
-        $response          = $this->guzzle->request( 'POST', $url );
+        $response          = $this->guzzle->request('POST', $url);
         $body              = $response->getBody();
-        $robinhoodResponse = \GuzzleHttp\json_decode( $body->getContents(), TRUE );
+        $robinhoodResponse = \GuzzleHttp\json_decode($body->getContents(), TRUE);
         return $robinhoodResponse;
     }
 
 
     /**
      * @TODO test extendedHours after hours to see if it will execute if passed in a TRUE value.
-     * @param string $accountUrl    Ex: https://api.robinhood.com/accounts/ABC12345/
-     * @param string $ticker        Ex: LODE
-     * @param int    $shares        How many shares you want to buy.
-     * @param bool   $extendedHours Not sure this is required either...
-     * @param float  $bidPrice      The user can set their own bid price for this market buy.
+     * @param string $accountUrl Ex: https://api.robinhood.com/accounts/ABC12345/
+     * @param string $ticker Ex: LODE
+     * @param int $shares How many shares you want to buy.
+     * @param bool $extendedHours Not sure this is required either...
+     * @param float $bidPrice The user can set their own bid price for this market buy.
      * @return \MichaelDrennen\Robinhood\Responses\Orders\Order
      * @throws \GuzzleHttp\Exception\GuzzleException
      * @throws \Exception
      */
-    public function marketBuy( string $accountUrl, string $ticker, int $shares, bool $extendedHours = FALSE, float $bidPrice = NULL ) {
-        $ticker        = Robinhood::translateTicker( $ticker );
-        $instrumentUrl = $this->getInstrumentUrlFromTicker( $ticker );
+    public function marketBuy(string $accountUrl, string $ticker, int $shares, bool $extendedHours = FALSE, float $bidPrice = NULL) {
+        $ticker        = Robinhood::translateTicker($ticker);
+        $instrumentUrl = $this->getInstrumentUrlFromTicker($ticker);
 
-        if ( ! isset( $bidPrice ) ):
-            $bidPrice = $this->getBidPriceFromTicker( $ticker );
+        if (!isset($bidPrice)):
+            $bidPrice = $this->getBidPriceFromTicker($ticker);
         endif;
-        $adjustedBidPrice = $this->getAdjustedBidPrice( $bidPrice );
+        $adjustedBidPrice = $this->getAdjustedBidPrice($bidPrice);
 
 
         $url               = '/orders/';
-        $response          = $this->guzzle->request( 'POST', $url,
-                                                     [
-                                                         'form_params' => [
-                                                             'account'        => $accountUrl,
-                                                             'instrument'     => $instrumentUrl,
-                                                             'price'          => $adjustedBidPrice,
-                                                             'quantity'       => $shares,
-                                                             'side'           => 'buy',
-                                                             'symbol'         => $ticker,
-                                                             'time_in_force'  => 'gfd',
-                                                             'trigger'        => 'immediate',
-                                                             'type'           => 'market',
-                                                             'extended_hours' => $extendedHours,
-                                                         ],
-                                                     ] );
+        $response          = $this->guzzle->request('POST', $url,
+                                                    [
+                                                        'form_params' => [
+                                                            'account' => $accountUrl,
+                                                            'instrument' => $instrumentUrl,
+                                                            'price' => $adjustedBidPrice,
+                                                            'quantity' => $shares,
+                                                            'side' => 'buy',
+                                                            'symbol' => $ticker,
+                                                            'time_in_force' => 'gfd',
+                                                            'trigger' => 'immediate',
+                                                            'type' => 'market',
+                                                            'extended_hours' => $extendedHours,
+                                                        ],
+                                                    ]);
         $body              = $response->getBody();
-        $robinhoodResponse = \GuzzleHttp\json_decode( $body->getContents(), TRUE );
-        return new Order( $robinhoodResponse );
+        $robinhoodResponse = \GuzzleHttp\json_decode($body->getContents(), TRUE);
+        return new Order($robinhoodResponse);
     }
 
     /**
@@ -392,12 +400,12 @@ class Robinhood {
      * @param float $bidPrice The bid price returned from the quotes API call.
      * @return float
      */
-    protected function getAdjustedBidPrice( float $bidPrice ): float {
-        if ( $bidPrice >= 1 ):
-            return (float)( round( $bidPrice, 2 ) + 1 );
+    protected function getAdjustedBidPrice(float $bidPrice): float {
+        if ($bidPrice >= 1):
+            return (float)(round($bidPrice, 2) + 1);
         endif;
 
-        return (float)( $bidPrice + .1 );
+        return (float)($bidPrice + .1);
     }
 
 //    public function limitBuy( string $account, string $instrumentUrl, string $ticker, int $shares, float $bidPrice = NULL, bool $extendedHours = FALSE ) {
@@ -424,57 +432,57 @@ class Robinhood {
 
 
     /**
-     * @param string     $account
-     * @param string     $ticker
-     * @param int        $shares
+     * @param string $account
+     * @param string $ticker
+     * @param int $shares
      * @param float|NULL $stopPrice Set your own price for this market sell.
-     * @param bool       $extendedHours
+     * @param bool $extendedHours
      * @return \MichaelDrennen\Robinhood\Responses\Orders\Order
      * @throws \GuzzleHttp\Exception\GuzzleException
      */
-    public function marketSell( string $account, string $ticker, int $shares, float $stopPrice = NULL, bool $extendedHours = FALSE ) {
-        $ticker        = Robinhood::translateTicker( $ticker );
-        $instrumentUrl = $this->getInstrumentUrlFromTicker( $ticker );
+    public function marketSell(string $account, string $ticker, int $shares, float $stopPrice = NULL, bool $extendedHours = FALSE) {
+        $ticker        = Robinhood::translateTicker($ticker);
+        $instrumentUrl = $this->getInstrumentUrlFromTicker($ticker);
 
 
-        if ( $stopPrice ):
+        if ($stopPrice):
             $askPrice = $stopPrice;
         else:
-            $askPrice = $this->getAskPriceFromTicker( $ticker );
+            $askPrice = $this->getAskPriceFromTicker($ticker);
         endif;
-        $adjustedStopPrice = $this->getAdjustedStopPrice( $askPrice );
+        $adjustedStopPrice = $this->getAdjustedStopPrice($askPrice);
 
         $url               = '/orders/';
-        $response          = $this->guzzle->request( 'POST', $url,
-                                                     [
-                                                         'form_params' => [
-                                                             'account'        => $account,
-                                                             'instrument'     => $instrumentUrl,
-                                                             'price'          => $adjustedStopPrice,
-                                                             'quantity'       => $shares,
-                                                             'side'           => 'sell',
-                                                             'symbol'         => $ticker,
-                                                             'time_in_force'  => 'gfd',
-                                                             'trigger'        => 'immediate',
-                                                             'type'           => 'market',
-                                                             'extended_hours' => $extendedHours,
-                                                         ],
-                                                     ] );
+        $response          = $this->guzzle->request('POST', $url,
+                                                    [
+                                                        'form_params' => [
+                                                            'account' => $account,
+                                                            'instrument' => $instrumentUrl,
+                                                            'price' => $adjustedStopPrice,
+                                                            'quantity' => $shares,
+                                                            'side' => 'sell',
+                                                            'symbol' => $ticker,
+                                                            'time_in_force' => 'gfd',
+                                                            'trigger' => 'immediate',
+                                                            'type' => 'market',
+                                                            'extended_hours' => $extendedHours,
+                                                        ],
+                                                    ]);
         $body              = $response->getBody();
-        $robinhoodResponse = \GuzzleHttp\json_decode( $body->getContents(), TRUE );
-        return new Order( $robinhoodResponse );
+        $robinhoodResponse = \GuzzleHttp\json_decode($body->getContents(), TRUE);
+        return new Order($robinhoodResponse);
     }
 
     /**
      * @param float $stopPrice
      * @return float
      */
-    public function getAdjustedStopPrice( float $stopPrice ): float {
-        if ( $stopPrice >= 1 ):
-            return (float)( round( $stopPrice, 2 ) - 1 );
+    public function getAdjustedStopPrice(float $stopPrice): float {
+        if ($stopPrice >= 1):
+            return (float)(round($stopPrice, 2) - 1);
         endif;
 
-        return (float)( $stopPrice - .1 );
+        return (float)($stopPrice - .1);
     }
 
     /**
@@ -482,13 +490,13 @@ class Robinhood {
      * @return \MichaelDrennen\Robinhood\Responses\Quotes\Quote
      * @throws \GuzzleHttp\Exception\GuzzleException
      */
-    public function quote( string $ticker ): Quote {
-        $ticker            = Robinhood::translateTicker( $ticker );
+    public function quote(string $ticker): Quote {
+        $ticker            = Robinhood::translateTicker($ticker);
         $url               = '/quotes/' . $ticker . '/';
-        $response          = $this->guzzle->request( 'GET', $url );
+        $response          = $this->guzzle->request('GET', $url);
         $body              = $response->getBody();
-        $robinhoodResponse = \GuzzleHttp\json_decode( $body->getContents(), TRUE );
-        return new Quote( $robinhoodResponse );
+        $robinhoodResponse = \GuzzleHttp\json_decode($body->getContents(), TRUE);
+        return new Quote($robinhoodResponse);
     }
 
 
@@ -497,49 +505,49 @@ class Robinhood {
      * @return \MichaelDrennen\Robinhood\Responses\Quotes\Quotes
      * @throws \GuzzleHttp\Exception\GuzzleException
      */
-    public function quotesForTickers( array $tickers ): Quotes {
-        foreach ( $tickers as $i => $ticker ):
-            $tickers[ $i ] = Robinhood::translateTicker( $ticker );
+    public function quotesForTickers(array $tickers): Quotes {
+        foreach ($tickers as $i => $ticker):
+            $tickers[$i] = Robinhood::translateTicker($ticker);
         endforeach;
-        $csvTickers        = implode( ',', $tickers );
+        $csvTickers        = implode(',', $tickers);
         $url               = '/quotes/?symbols=' . $csvTickers;
-        $response          = $this->guzzle->request( 'GET', $url );
+        $response          = $this->guzzle->request('GET', $url);
         $body              = $response->getBody();
         $contents          = $body->getContents();
-        $robinhoodResponse = \GuzzleHttp\json_decode( $contents, TRUE );
+        $robinhoodResponse = \GuzzleHttp\json_decode($contents, TRUE);
 
-        return new Quotes( $robinhoodResponse );
+        return new Quotes($robinhoodResponse);
     }
 
 
     public function markets(): Markets {
         $url               = '/markets/';
-        $response          = $this->guzzle->request( 'GET', $url );
+        $response          = $this->guzzle->request('GET', $url);
         $body              = $response->getBody();
         $contents          = $body->getContents();
-        $robinhoodResponse = \GuzzleHttp\json_decode( $contents, TRUE );
+        $robinhoodResponse = \GuzzleHttp\json_decode($contents, TRUE);
 
-        return new Markets( $robinhoodResponse );
+        return new Markets($robinhoodResponse);
     }
 
-    public function market( string $mic ): Market {
+    public function market(string $mic): Market {
         $url               = '/markets/' . $mic;
-        $response          = $this->guzzle->request( 'GET', $url );
+        $response          = $this->guzzle->request('GET', $url);
         $body              = $response->getBody();
         $contents          = $body->getContents();
-        $robinhoodResponse = \GuzzleHttp\json_decode( $contents, TRUE );
+        $robinhoodResponse = \GuzzleHttp\json_decode($contents, TRUE);
 
-        return new Market( $robinhoodResponse );
+        return new Market($robinhoodResponse);
     }
 
-    public function marketHours( string $mic, Carbon $date ): MarketHours {
+    public function marketHours(string $mic, Carbon $date): MarketHours {
         $url               = '/markets/' . $mic . '/hours/' . $date->toDateString();
-        $response          = $this->guzzle->request( 'GET', $url );
+        $response          = $this->guzzle->request('GET', $url);
         $body              = $response->getBody();
         $contents          = $body->getContents();
-        $robinhoodResponse = \GuzzleHttp\json_decode( $contents, TRUE );
+        $robinhoodResponse = \GuzzleHttp\json_decode($contents, TRUE);
 
-        return new MarketHours( $robinhoodResponse );
+        return new MarketHours($robinhoodResponse);
     }
 
     /**
@@ -548,19 +556,19 @@ class Robinhood {
      * @throws \GuzzleHttp\Exception\GuzzleException
      * @throws \Exception;
      */
-    protected function getInstrumentUrlFromTicker( string $ticker ) {
-        $ticker      = Robinhood::translateTicker( $ticker );
-        $instruments = $this->instrumentsBySymbol( $ticker );
+    protected function getInstrumentUrlFromTicker(string $ticker) {
+        $ticker      = Robinhood::translateTicker($ticker);
+        $instruments = $this->instrumentsBySymbol($ticker);
 
         /**
          * @var $instrument \MichaelDrennen\Robinhood\Responses\Instruments\Instrument
          */
-        foreach ( $instruments->objects as $instrument ):
-            if ( $ticker == $instrument->symbol ):
+        foreach ($instruments->objects as $instrument):
+            if ($ticker == $instrument->symbol):
                 return $instrument->url;
             endif;
         endforeach;
-        throw new \Exception( "Unable to find the instrument url for the ticker: " . $ticker );
+        throw new \Exception("Unable to find the instrument url for the ticker: " . $ticker);
     }
 
     /**
@@ -568,9 +576,9 @@ class Robinhood {
      * @return float
      * @throws \GuzzleHttp\Exception\GuzzleException
      */
-    protected function getBidPriceFromTicker( string $ticker ): float {
-        $ticker = Robinhood::translateTicker( $ticker );
-        $quote  = $this->quote( $ticker );
+    protected function getBidPriceFromTicker(string $ticker): float {
+        $ticker = Robinhood::translateTicker($ticker);
+        $quote  = $this->quote($ticker);
         return $quote->bid_price;
     }
 
@@ -579,9 +587,9 @@ class Robinhood {
      * @return float
      * @throws \GuzzleHttp\Exception\GuzzleException
      */
-    protected function getAskPriceFromTicker( string $ticker ): float {
-        $ticker = Robinhood::translateTicker( $ticker );
-        $quote  = $this->quote( $ticker );
+    protected function getAskPriceFromTicker(string $ticker): float {
+        $ticker = Robinhood::translateTicker($ticker);
+        $quote  = $this->quote($ticker);
         return $quote->ask_price;
     }
 
