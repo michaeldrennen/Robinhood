@@ -108,17 +108,17 @@ class RobinhoodTest extends TestCase {
 
     /**
      * @test
-     * @group  buy_and_cancel
-     * @group  logged_in_failures
-     * @group  not_trading
-     * @group  quotes
-     * @group  markets
+     * @group buy_and_cancel
+     * @group logged_in_failures
+     * @group not_trading
+     * @group quotes
+     * @group markets
+     * @group login
      */
     public function validLoginShouldGrantAccessToken(): Robinhood {
         $dotenv = new Dotenv( __DIR__ );
         $dotenv->load();
         $robinhood = new Robinhood();
-        $robinhood->login( getenv( 'USERNAME' ), getenv( 'PASSWORD' ) );
         $robinhood->login( getenv( 'USERNAME' ), getenv( 'PASSWORD' ) );
         $accessToken  = $robinhood->getAccessToken();
         $refreshToken = $robinhood->getRefreshToken();
