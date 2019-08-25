@@ -5,6 +5,7 @@ namespace MichaelDrennen\Robinhood;
 
 use Carbon\Carbon;
 use GuzzleHttp\Client;
+
 use MichaelDrennen\Robinhood\Responses\Accounts\Accounts;
 use MichaelDrennen\Robinhood\Responses\Instruments\Instrument;
 use MichaelDrennen\Robinhood\Responses\Instruments\Instruments;
@@ -104,9 +105,6 @@ class Robinhood {
         $clientId    = $this->getClientId();
         $deviceToken = $this->getDeviceToken();
 
-
-
-
         $options = [
             'form_params' => [
                 // OLD PARAMS
@@ -118,22 +116,18 @@ class Robinhood {
 
                 // New Order of Items
                 'client_id'    => $clientId,
-                'device_token' => 'a4013c22-ace2-40e7-bbca-67e1d93ed969',
+                'device_token' => $deviceToken,
                 'expires_in'   => 86400,
                 'grant_type'   => 'password',
                 'password'     => $password,
                 'scope'        => 'internal',
                 'username'     => $username,
-
-
             ],
         ];
 
         $response          = $this->guzzle->request( 'POST', $url, $options );
         $body              = $response->getBody();
         $robinhoodResponse = \GuzzleHttp\json_decode( $body->getContents(), TRUE );
-
-
 
         $this->accessToken  = $robinhoodResponse[ 'access_token' ];
         $this->expiresIn    = $robinhoodResponse[ 'expires_in' ];
@@ -173,29 +167,13 @@ class Robinhood {
 
     /**
      * @return string
+     * @throws \Exception
      */
     protected function getDeviceToken(): string {
+        // Seems like this device id was registered with my laptop, so
+        // their system is kosher with it.
+        // TODO Dig into their JS to pull a device token using Guzzle
         return 'a4013c22-ace2-40e7-bbca-67e1d93ed969';
-        $rands = [];
-
-//        rands = []
-//    for i in range(0,16):
-//        r = random.random()
-//        rand = 4294967296.0 * r
-//        rands.append((int(rand) >> ((3 & i) << 3)) & 255)
-//
-//    hexa = []
-//    for i in range(0,256):
-//        hexa.append(str(hex(i+256)).lstrip("0x").rstrip("L")[1:])
-//
-//    id = ""
-//    for i in range(0,16):
-//        id += hexa[rands[i]]
-//
-//        if (i == 3) or (i == 5) or (i == 7) or (i == 9):
-//            id += "-"
-//
-//    return(id)
     }
 
     /**

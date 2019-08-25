@@ -12,6 +12,9 @@ use MichaelDrennen\Robinhood\Responses\Positions\Position;
 use MichaelDrennen\Robinhood\Robinhood;
 use PHPUnit\Framework\TestCase;
 
+use GuzzleHttp\Psr7;
+
+
 class RobinhoodTest extends TestCase {
 
 
@@ -126,6 +129,7 @@ class RobinhoodTest extends TestCase {
         $this->assertNotEmpty( $refreshToken );
         return $robinhood;
     }
+
 
 
     /**
