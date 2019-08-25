@@ -97,24 +97,16 @@ class Robinhood {
     /**
      * @param string $username
      * @param string $password
+     * @param string $deviceToken
      * @throws \GuzzleHttp\Exception\GuzzleException
      * @throws \Exception
      */
-    public function login( string $username, string $password ) {
+    public function login( string $username, string $password, string $deviceToken ) {
         $url         = '/oauth2/token/';
         $clientId    = $this->getClientId();
-        $deviceToken = $this->getDeviceToken();
 
         $options = [
             'form_params' => [
-                // OLD PARAMS
-                //                'client_id' => $clientId,
-                //                'username' => $username,
-                //                'password' => $password,
-                //                'grant_type' => 'password',
-
-
-                // New Order of Items
                 'client_id'    => $clientId,
                 'device_token' => $deviceToken,
                 'expires_in'   => 86400,
@@ -165,16 +157,7 @@ class Robinhood {
         throw new \Exception( "Unable to get the client id, so we can't login." );
     }
 
-    /**
-     * @return string
-     * @throws \Exception
-     */
-    protected function getDeviceToken(): string {
-        // Seems like this device id was registered with my laptop, so
-        // their system is kosher with it.
-        // TODO Dig into their JS to pull a device token using Guzzle
-        return 'a4013c22-ace2-40e7-bbca-67e1d93ed969';
-    }
+
 
     /**
      * @param string|NULL $accountId Ex: ABC12345

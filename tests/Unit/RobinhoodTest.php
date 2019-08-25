@@ -12,7 +12,6 @@ use MichaelDrennen\Robinhood\Responses\Positions\Position;
 use MichaelDrennen\Robinhood\Robinhood;
 use PHPUnit\Framework\TestCase;
 
-use GuzzleHttp\Psr7;
 
 
 class RobinhoodTest extends TestCase {
@@ -122,7 +121,7 @@ class RobinhoodTest extends TestCase {
         $dotenv = new Dotenv( __DIR__ );
         $dotenv->load();
         $robinhood = new Robinhood();
-        $robinhood->login( getenv( 'USERNAME' ), getenv( 'PASSWORD' ) );
+        $robinhood->login( getenv( 'USERNAME' ), getenv( 'PASSWORD' ), getenv('DEVICE_TOKEN') );
         $accessToken  = $robinhood->getAccessToken();
         $refreshToken = $robinhood->getRefreshToken();
         $this->assertNotEmpty( $accessToken );
@@ -293,7 +292,7 @@ class RobinhoodTest extends TestCase {
         $dotenv = new Dotenv( __DIR__ );
         $dotenv->load();
         $robinhood = new Robinhood();
-        $robinhood->login( getenv( 'USERNAME' ), getenv( 'PASSWORD' ) );
+        $robinhood->login( getenv( 'USERNAME' ), getenv( 'PASSWORD', getenv('DEVICE_TOKEN') ) );
         $order = $robinhood->getOrderInformation( $orderId );
         $this->assertNotEmpty( $order->id );
         return $orderId;
@@ -309,7 +308,7 @@ class RobinhoodTest extends TestCase {
         $dotenv = new Dotenv( __DIR__ );
         $dotenv->load();
         $robinhood = new Robinhood();
-        $robinhood->login( getenv( 'USERNAME' ), getenv( 'PASSWORD' ) );
+        $robinhood->login( getenv( 'USERNAME' ), getenv( 'PASSWORD', getenv('DEVICE_TOKEN') ) );
         $robinhoodResponse = $robinhood->cancelOrder( $orderId );
         $this->assertEmpty( $robinhoodResponse );
     }
@@ -325,7 +324,7 @@ class RobinhoodTest extends TestCase {
         $dotenv         = new Dotenv( __DIR__ );
         $dotenv->load();
         $robinhood = new Robinhood();
-        $robinhood->login( getenv( 'USERNAME' ), getenv( 'PASSWORD' ) );
+        $robinhood->login( getenv( 'USERNAME' ), getenv( 'PASSWORD' ), getenv('DEVICE_TOKEN') );
         $robinhood->cancelOrder( $invalidOrderId );
     }
 
@@ -347,7 +346,7 @@ class RobinhoodTest extends TestCase {
     public function badLoginShouldThrowException() {
         $this->expectException( ClientException::class );
         $robinhood = new Robinhood();
-        $robinhood->login( 'foo', 'bar' );
+        $robinhood->login( 'foo', 'bar', getenv('DEVICE_TOKEN') );
     }
 
     /**
