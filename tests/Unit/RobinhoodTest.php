@@ -292,7 +292,7 @@ class RobinhoodTest extends TestCase {
         $dotenv = new Dotenv( __DIR__ );
         $dotenv->load();
         $robinhood = new Robinhood();
-        $robinhood->login( getenv( 'USERNAME' ), getenv( 'PASSWORD', getenv('DEVICE_TOKEN') ) );
+        $robinhood->login( getenv( 'USERNAME' ), getenv( 'PASSWORD' ), getenv('DEVICE_TOKEN') );
         $order = $robinhood->getOrderInformation( $orderId );
         $this->assertNotEmpty( $order->id );
         return $orderId;
@@ -308,7 +308,7 @@ class RobinhoodTest extends TestCase {
         $dotenv = new Dotenv( __DIR__ );
         $dotenv->load();
         $robinhood = new Robinhood();
-        $robinhood->login( getenv( 'USERNAME' ), getenv( 'PASSWORD', getenv('DEVICE_TOKEN') ) );
+        $robinhood->login( getenv( 'USERNAME' ), getenv( 'PASSWORD' ), getenv('DEVICE_TOKEN') );
         $robinhoodResponse = $robinhood->cancelOrder( $orderId );
         $this->assertEmpty( $robinhoodResponse );
     }
