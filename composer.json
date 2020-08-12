@@ -1,5 +1,6 @@
 {
   "name": "michaeldrennen/robinhood",
+  "description": "A PHP client to interface with the Robinhood trading platform.",
   "type": "library",
   "license": "MIT",
   "authors": [
