@@ -10,8 +10,8 @@
   ],
   "require": {
     "ext-json": "*",
-    "guzzlehttp/guzzle": "^6.3",
-    "nesbot/carbon": "^2.23",
+    "guzzlehttp/guzzle": "^6.3|^7.0",
+    "nesbot/carbon": "^2.0",
     "vlucas/phpdotenv": "^3.4|^5.0"
   },
   "require-dev": {
